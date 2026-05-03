@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetPulse — Data Communication & Network Protocols Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#040810;--s1:#070f1c;--s2:#0b1626;--s3:#0f1e33;--s4:#152540;
+  --border:#1a2e48;--border2:#224060;
+  --teal:#00d4b4;--teal2:#00a890;--teal3:#007a68;
+  --blue:#2563eb;--cyan:#06b6d4;--green:#22c55e;
+  --amber:#f59e0b;--rose:#f43f5e;--violet:#8b5cf6;--orange:#f97316;
+  --text:#ddeeff;--text2:#6b8aaa;--text3:#2d4a68;
+  --packet:#00d4b4;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:248px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;}
+.sidebar::before{content:'';position:absolute;top:0;left:247px;width:1px;height:100%;background:linear-gradient(180deg,var(--teal) 0%,transparent 60%);z-index:5;}
+.logo-zone{padding:20px 16px;border-bottom:1px solid var(--border);}
+.logo-pill{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(0,212,180,.1),rgba(6,182,212,.05));border:1px solid rgba(0,212,180,.25);border-radius:10px;padding:10px 13px;margin-bottom:7px;}
+.logo-sq{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--teal),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 14px rgba(0,212,180,.3);}
+.logo-name{font-size:19px;font-weight:700;color:var(--text);letter-spacing:-.3px;}
+.logo-sub{font-size:9px;color:var(--text3);letter-spacing:1.8px;text-transform:uppercase;margin-top:1px;}
+.nav{padding:10px 10px;flex:1;overflow-y:auto;}
+.nav-g{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:10px 10px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;transition:all .18s;font-size:12.5px;color:var(--text2);border:1px solid transparent;margin-bottom:2px;font-weight:500;}
+.nav-item:hover{background:var(--s2);color:var(--text);border-color:var(--border);}
+.nav-item.active{background:rgba(0,212,180,.08);color:var(--teal);border-color:rgba(0,212,180,.25);}
+.nav-icon{font-size:14px;width:18px;text-align:center;}
+.lang-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;font-family:'Space Mono',monospace;}
+
+.sidebar-foot{padding:12px 14px;border-top:1px solid var(--border);}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px;}
+.lang-chip{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:10px;font-weight:600;text-align:center;font-family:'Space Mono',monospace;}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;height:100vh;}
+.topbar{position:sticky;top:0;z-index:10;padding:13px 26px;background:rgba(4,8,16,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.page-head .title{font-size:20px;font-weight:700;letter-spacing:-.3px;}
+.page-head .sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.live-chip{display:flex;align-items:center;gap:6px;background:rgba(0,212,180,.08);border:1px solid rgba(0,212,180,.2);border-radius:20px;padding:5px 12px;font-size:10.5px;color:var(--teal);font-weight:600;font-family:'Space Mono',monospace;}
+.live-dot{width:6px;height:6px;background:var(--teal);border-radius:50%;box-shadow:0 0 6px var(--teal);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+.content{padding:20px 26px;}
+.page{display:none;}.page.active{display:block;}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:18px;}
+.card-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13.5px;font-weight:700;}
+.card-sub{font-size:10.5px;color:var(--text2);margin-top:2px;}
+.card-body{padding:18px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+
+/* ── KPI ── */
+.kpi{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;transition:all .2s;}
+.kpi:hover{border-color:var(--border2);}
+.kpi-val{font-size:28px;font-weight:800;letter-spacing:-.5px;font-family:'Space Mono',monospace;}
+.kpi-lbl{font-size:11px;color:var(--text2);margin-top:5px;}
+
+/* ── CODE BLOCK ── */
+.code{background:#020509;border:1px solid var(--border2);border-radius:8px;padding:16px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.85;overflow-x:auto;position:relative;}
+.code-header{background:var(--s3);padding:8px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text2);letter-spacing:1px;display:flex;align-items:center;justify-content:space-between;font-family:'Space Mono',monospace;}
+.lang-tag{padding:2px 8px;border-radius:3px;font-size:9px;font-weight:700;}
+.py{background:rgba(59,130,246,.15);color:#60a5fa;}
+.java{background:rgba(245,158,11,.12);color:var(--amber);}
+.c{background:rgba(139,92,246,.12);color:#a78bfa;}
+.sql{background:rgba(34,197,94,.1);color:var(--green);}
+.bash{background:rgba(0,212,180,.1);color:var(--teal);}
+
+.kw{color:#c084fc;}
+.fn{color:#34d399;}
+.str{color:var(--amber);}
+.cmt{color:var(--text3);}
+.cls{color:#60a5fa;}
+.num{color:#f87171;}
+
+/* ── PACKET ANIMATOR ── */
+.packet-demo{background:#020509;border:1px solid var(--border);border-radius:10px;padding:20px;position:relative;overflow:hidden;min-height:180px;}
+.network-line{position:absolute;left:0;right:0;top:50%;height:2px;background:linear-gradient(90deg,var(--teal3),var(--teal),var(--teal3));}
+.node-box{position:absolute;top:50%;transform:translateY(-50%);background:var(--s3);border:2px solid var(--teal3);border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;font-family:'Space Mono',monospace;color:var(--teal);}
+.node-box.client{left:40px;}
+.node-box.server{right:40px;}
+.packet-anim{position:absolute;top:calc(50% - 8px);width:16px;height:16px;border-radius:3px;background:var(--teal);box-shadow:0 0 12px var(--teal);animation:none;display:none;}
+@keyframes sendPacket{0%{left:140px;opacity:1;}90%{opacity:1;}100%{left:calc(100% - 150px);opacity:0;}}
+@keyframes recvAck{0%{right:140px;opacity:1;}100%{right:calc(100% - 150px);opacity:0;}}
+
+/* ── OSI DIAGRAM ── */
+.osi-layer{border-radius:8px;padding:12px 16px;margin-bottom:6px;display:flex;align-items:center;gap:14px;transition:all .2s;cursor:pointer;}
+.osi-layer:hover{filter:brightness(1.15);}
+.osi-num{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;min-width:28px;}
+.osi-name{font-size:13px;font-weight:700;min-width:120px;}
+.osi-proto{font-size:11px;flex:1;}
+.osi-pdu{font-size:10.5px;min-width:80px;text-align:right;font-family:'Space Mono',monospace;}
+
+/* ── TCP STATE MACHINE ── */
+.state-machine{display:flex;flex-wrap:wrap;gap:8px;}
+.tcp-state{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 14px;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;}
+.tcp-state:hover,.tcp-state.active{border-color:var(--teal);color:var(--teal);background:rgba(0,212,180,.06);}
+.tcp-state.hl-green{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.06);}
+
+/* ── PROGRESS / BAR ── */
+.prog{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'Space Mono',monospace;}
+.b-tcp{background:rgba(37,99,235,.15);color:#60a5fa;}
+.b-udp{background:rgba(245,158,11,.12);color:var(--amber);}
+.b-http{background:rgba(34,197,94,.1);color:var(--green);}
+.b-dns{background:rgba(139,92,246,.12);color:#a78bfa;}
+
+/* ── INPUT/BTN ── */
+input,select,textarea{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:7px;font-family:'Space Grotesk',sans-serif;font-size:13px;padding:9px 12px;transition:all .18s;width:100%;}
+input:focus,select:focus{outline:none;border-color:var(--teal3);box-shadow:0 0 0 3px rgba(0,212,180,.08);}
+label{font-size:10.5px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.fg{margin-bottom:13px;}
+.btn{padding:8px 16px;border-radius:7px;border:none;font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;}
+.btn-teal{background:var(--teal);color:#000;box-shadow:0 4px 14px rgba(0,212,180,.2);}
+.btn-teal:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,212,180,.3);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--s2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:11.5px;}
+
+/* ── SCROLL ── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+.sec-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin:0 0 10px;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:9px;padding:12px 18px;font-size:12px;z-index:999;transform:translateX(200%);transition:transform .3s;max-width:300px;}
+.toast.show{transform:translateX(0);}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ═══════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="logo-zone">
+    <div class="logo-pill">
+      <div class="logo-sq">📡</div>
+      <div><div class="logo-name">NetPulse</div><div class="logo-sub">CSC 417 — Data Comm</div></div>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="nav-g">Overview</div>
+    <div class="nav-item active" onclick="nav('home',this)"><span class="nav-icon">⬡</span> Dashboard</div>
+    <div class="nav-g">Network Concepts</div>
+    <div class="nav-item" onclick="nav('osi',this)"><span class="nav-icon">📚</span> OSI Model</div>
+    <div class="nav-item" onclick="nav('tcp',this)"><span class="nav-icon">🔗</span> TCP Protocol <span class="lang-badge py">PY</span></div>
+    <div class="nav-item" onclick="nav('udp',this)"><span class="nav-icon">📨</span> UDP Protocol <span class="lang-badge py">PY</span></div>
+    <div class="nav-item" onclick="nav('packets',this)"><span class="nav-icon">📦</span> Packet Structure <span class="lang-badge c" style="background:rgba(139,92,246,.15);color:#a78bfa;">C</span></div>
+    <div class="nav-g">Implementations</div>
+    <div class="nav-item" onclick="nav('python',this)"><span class="nav-icon">🐍</span> Python Servers <span class="lang-badge py">PY</span></div>
+    <div class="nav-item" onclick="nav('java',this)"><span class="nav-icon">☕</span> Java Chat App <span class="lang-badge java">JAVA</span></div>
+    <div class="nav-item" onclick="nav('clang',this)"><span class="nav-icon">🔵</span> C Socket API <span class="lang-badge c" style="background:rgba(139,92,246,.15);color:#a78bfa;">C</span></div>
+    <div class="nav-item" onclick="nav('bash',this)"><span class="nav-icon">🖥</span> Bash Diagnostics <span class="lang-badge bash">SH</span></div>
+    <div class="nav-item" onclick="nav('database',this)"><span class="nav-icon">🗄</span> SQL Logs DB <span class="lang-badge sql">SQL</span></div>
+    <div class="nav-g">Tools</div>
+    <div class="nav-item" onclick="nav('simulator',this)"><span class="nav-icon">⚡</span> Protocol Sim</div>
+    <div class="nav-item" onclick="nav('calc',this)"><span class="nav-icon">🧮</span> Network Calculator</div>
+  </div>
+  <div class="sidebar-foot">
+    <div class="sec-lbl">Languages Used</div>
+    <div class="lang-grid">
+      <div class="lang-chip" style="color:#60a5fa;">Python 3</div>
+      <div class="lang-chip" style="color:var(--amber);">Java 17</div>
+      <div class="lang-chip" style="color:#a78bfa;">C (POSIX)</div>
+      <div class="lang-chip" style="color:var(--teal);">Bash</div>
+      <div class="lang-chip" style="color:var(--green);">SQL</div>
+      <div class="lang-chip" style="color:var(--orange);">HTML/JS</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ MAIN ═══════════════════════════════════════════════ -->
+<main class="main">
+  <div class="topbar">
+    <div class="page-head">
+      <div class="title" id="page-title">Network Dashboard</div>
+      <div class="sub" id="page-sub">CSC 417: Data Communication — Multi-Language Network Lab</div>
+    </div>
+    <div class="live-chip"><div class="live-dot"></div><span id="live-text">NETWORK ACTIVE</span></div>
+  </div>
+
+  <div class="content">
+
+  <!-- ════ DASHBOARD ════════════════════════════════════════ -->
+  <div class="page active" id="page-home">
+    <div class="g4" style="margin-bottom:18px;">
+      <div class="kpi"><div class="kpi-val" style="color:var(--teal)">6</div><div class="kpi-lbl">Programming Languages</div></div>
+      <div class="kpi"><div class="kpi-val" style="color:var(--blue)">7</div><div class="kpi-lbl">OSI Layers Covered</div></div>
+      <div class="kpi"><div class="kpi-val" style="color:var(--green)">4</div><div class="kpi-lbl">Server Implementations</div></div>
+      <div class="kpi"><div class="kpi-val" style="color:var(--amber)">TCP<br style="display:none">+UDP</div><div class="kpi-lbl">Transport Protocols</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🗂 Project Structure</div><div class="card-sub">Multi-language GitHub repository layout</div></div></div>
+        <div class="card-body">
+          <div class="code" style="font-size:11.5px;line-height:2;">
+<span style="color:var(--teal)">netpulse/</span>
+├── <span style="color:#60a5fa">python/</span>
+│   ├── tcp_server.py       <span class="cmt"># TCP multi-threaded server</span>
+│   └── udp_protocols.py    <span class="cmt"># UDP, Stop&Wait, DNS</span>
+├── <span style="color:var(--amber)">java/</span>
+│   └── NetPulseChatServer.java  <span class="cmt"># Chat app + client</span>
+├── <span style="color:#a78bfa">c/</span>
+│   └── netpulse_server.c   <span class="cmt"># POSIX socket API</span>
+├── <span style="color:var(--green)">sql/</span>
+│   └── netpulse_db.sql     <span class="cmt"># Network logs DB</span>
+├── <span style="color:var(--teal)">bash/</span>
+│   └── netpulse_diag.sh    <span class="cmt"># Diagnostic suite</span>
+├── <span style="color:var(--orange)">html/</span>
+│   └── index.html          <span class="cmt"># This dashboard</span>
+└── README.md</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📚 CSC 417 Topics Covered</div></div>
+        <div class="card-body">
+          <div class="g2">
+            <div>
+              <div class="sec-lbl">Network Concepts</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2.1;">
+                OSI 7-Layer Model<br>TCP/IP Suite<br>IP Addressing & Subnets<br>Routing & Forwarding<br>DNS & DHCP<br>Network Topology
+              </div>
+            </div>
+            <div>
+              <div class="sec-lbl">Protocols & Implementation</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2.1;">
+                TCP (reliable, connection-based)<br>UDP (fast, connectionless)<br>Socket Programming (4 languages)<br>Stop-and-Wait ARQ<br>Packet Structure & Headers<br>Error Detection (CRC, Checksum)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">⚡ Live Packet Animation — TCP Three-Way Handshake</div></div>
+      <div class="card-body">
+        <div id="handshake-display" style="font-family:'Space Mono',monospace;font-size:12px;line-height:2.2;margin-bottom:14px;"></div>
+        <button class="btn btn-teal btn-sm" onclick="animateHandshake()">▶ Replay Handshake</button>
+        <button class="btn btn-ghost btn-sm" onclick="animateFourWay()">▶ Four-Way Termination</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ OSI MODEL ════════════════════════════════════════ -->
+  <div class="page" id="page-osi">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">📚 OSI 7-Layer Reference Model</div><div class="card-sub">Click any layer to see details and protocols</div></div></div>
+        <div class="card-body" id="osi-layers"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title" id="osi-detail-title">Select a Layer</div></div>
+        <div class="card-body" id="osi-detail">
+          <div style="color:var(--text2);font-size:13px;text-align:center;padding:40px 20px;">Click any OSI layer on the left to see detailed information, key protocols, and real-world examples.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ TCP PROTOCOL ════════════════════════════════════ -->
+  <div class="page" id="page-tcp">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🔗 TCP — Transmission Control Protocol</div><div class="card-sub">Connection-oriented, reliable, ordered delivery</div></div><span class="badge b-tcp">TCP Layer 4</span></div>
+        <div class="card-body">
+          <div class="sec-lbl">TCP Segment Header (20–60 bytes)</div>
+          <div class="code" style="font-size:10.5px;margin-bottom:14px;">
+ 0      7 8     15 16    23 24    31
+┌────────┬────────┬────────┬────────┐
+│   Source Port   │ Destination Port│  <span class="cmt">← Port numbers (0-65535)</span>
+├────────────────────────────────────┤
+│         Sequence Number            │  <span class="cmt">← Tracks bytes sent</span>
+├────────────────────────────────────┤
+│       Acknowledgment Number        │  <span class="cmt">← Next expected byte</span>
+├───┬────┬───────────────────────────┤
+│Off│Rsv │ Flags: SYN ACK FIN RST..│  <span class="cmt">← Control bits</span>
+├────────────────────────────────────┤
+│  Window Size    │    Checksum      │  <span class="cmt">← Flow control</span>
+└────────────────┴───────────────────┘</div>
+
+          <div class="sec-lbl">TCP Flags</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;" id="tcp-flags-display"></div>
+
+          <div class="sec-lbl">Connection States</div>
+          <div class="state-machine" id="tcp-states-display"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🐍 Python TCP Server Code</div></div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="code-header">tcp_server.py <span class="lang-tag py">Python 3</span></div>
+          <div class="code" style="border-radius:0;border:none;">
+<span class="cmt"># OSI Layer 4 — Transport (TCP)</span>
+<span class="kw">import</span> socket, threading, json
+
+<span class="kw">class</span> <span class="cls">NetPulseTCPServer</span>:
+    <span class="kw">def</span> <span class="fn">start</span>(self):
+        <span class="cmt"># AF_INET=IPv4, SOCK_STREAM=TCP</span>
+        self.sock = socket.<span class="fn">socket</span>(
+            socket.AF_INET,
+            socket.SOCK_STREAM
+        )
+        <span class="cmt"># Avoid TIME_WAIT port conflict</span>
+        self.sock.<span class="fn">setsockopt</span>(
+            socket.SOL_SOCKET,
+            socket.SO_REUSEADDR, <span class="num">1</span>
+        )
+        self.sock.<span class="fn">bind</span>((<span class="str">'127.0.0.1'</span>, <span class="num">9000</span>))
+        self.sock.<span class="fn">listen</span>(<span class="num">10</span>) <span class="cmt"># Backlog=10</span>
+
+        <span class="kw">while True</span>:
+            <span class="cmt"># Block until TCP handshake done</span>
+            conn, addr = self.sock.<span class="fn">accept</span>()
+            <span class="cmt"># New thread per client</span>
+            t = threading.<span class="cls">Thread</span>(
+                target=self.<span class="fn">handle</span>,
+                args=(conn, addr)
+            )
+            t.<span class="fn">start</span>()
+
+    <span class="kw">def</span> <span class="fn">handle</span>(self, conn, addr):
+        <span class="kw">with</span> conn:
+            <span class="kw">while True</span>:
+                data = conn.<span class="fn">recv</span>(<span class="num">4096</span>)
+                <span class="kw">if not</span> data: <span class="kw">break</span>
+                conn.<span class="fn">sendall</span>(data) <span class="cmt"># Echo</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ UDP PROTOCOL ════════════════════════════════════ -->
+  <div class="page" id="page-udp">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">📨 UDP — User Datagram Protocol</div><div class="card-sub">Connectionless, fast, no guaranteed delivery</div></div><span class="badge b-udp">UDP Layer 4</span></div>
+        <div class="card-body">
+          <div class="sec-lbl">UDP Datagram Header (8 bytes only!)</div>
+          <div class="code" style="font-size:10.5px;margin-bottom:14px;">
+ 0      7 8     15 16    23 24    31
+┌────────────────┬────────────────────┐
+│   Source Port  │  Destination Port  │
+├────────────────┬────────────────────┤
+│    Length      │     Checksum       │
+├────────────────┴────────────────────┤
+│            Data (payload)           │
+└─────────────────────────────────────┘
+
+TCP header: 20+ bytes   UDP header: 8 bytes
+TCP overhead: ~4%       UDP overhead: 0.8%</div>
+
+          <div class="sec-lbl">TCP vs UDP Comparison</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead><tr style="background:var(--s2);">
+              <th style="padding:8px 12px;text-align:left;color:var(--text2);border:1px solid var(--border);">Feature</th>
+              <th style="padding:8px 12px;text-align:center;color:#60a5fa;border:1px solid var(--border);">TCP</th>
+              <th style="padding:8px 12px;text-align:center;color:var(--amber);border:1px solid var(--border);">UDP</th>
+            </tr></thead>
+            <tbody id="tcp-udp-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">🐍 Stop-and-Wait ARQ Simulator</div></div>
+        <div class="card-body">
+          <div class="fg"><label>Packet Loss Probability (%)</label><input type="range" id="loss-slider" min="0" max="50" value="20" oninput="updateLoss()"><div style="text-align:center;font-family:'Space Mono',monospace;color:var(--teal);font-size:16px;margin-top:4px;"><span id="loss-display">20</span>%</div></div>
+          <div class="fg"><label>Frames to Send</label><input type="number" id="frames-count" value="5" min="2" max="10"></div>
+          <button class="btn btn-teal" onclick="runStopWait()">▶ Simulate</button>
+          <div id="stopwait-output" style="margin-top:14px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.8;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PACKET STRUCTURE ═════════════════════════════════ -->
+  <div class="page" id="page-packets">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">📦 IP Packet Structure</div><div class="card-sub">Layer 3 — Network Layer</div></div><span class="badge" style="background:rgba(139,92,246,.15);color:#a78bfa;">C Code</span></div>
+        <div class="card-body" style="padding:0;">
+          <div class="code-header">ip_header struct (C) <span class="lang-tag c" style="background:rgba(139,92,246,.15);color:#a78bfa;">C Language</span></div>
+          <div class="code" style="border-radius:0;border:none;">
+<span class="cmt">/* IPv4 Header Structure — 20 bytes min */</span>
+<span class="kw">struct</span> <span class="cls">ip_header</span> {
+    uint8_t  version_ihl;     <span class="cmt">/* Version(4) + IHL(4) */</span>
+    uint8_t  tos;             <span class="cmt">/* Type of Service / DSCP */</span>
+    uint16_t total_length;    <span class="cmt">/* Header + data in bytes */</span>
+    uint16_t identification;  <span class="cmt">/* Fragmentation ID */</span>
+    uint16_t flags_fragment;  <span class="cmt">/* DF, MF flags + offset */</span>
+    uint8_t  ttl;             <span class="cmt">/* Time-to-Live (hops) */</span>
+    uint8_t  protocol;        <span class="cmt">/* 6=TCP 17=UDP 1=ICMP */</span>
+    uint16_t checksum;        <span class="cmt">/* Header integrity check */</span>
+    uint32_t src_addr;        <span class="cmt">/* Source IP (network order)*/</span>
+    uint32_t dst_addr;        <span class="cmt">/* Destination IP */</span>
+} __attribute__((packed));    <span class="cmt">/* No padding bytes! */</span>
+
+<span class="cmt">/* Network byte order conversion */</span>
+uint32_t net_ip = <span class="fn">htonl</span>(host_ip); <span class="cmt">/* host→network */</span>
+uint16_t net_port = <span class="fn">htons</span>(<span class="num">9000</span>);  <span class="cmt">/* little→big endian */</span>
+uint32_t host_ip = <span class="fn">ntohl</span>(net_ip); <span class="cmt">/* network→host */</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🔍 Packet Encapsulation</div><div class="card-sub">How data travels down the OSI stack</div></div></div>
+        <div class="card-body">
+          <div class="sec-lbl">Encapsulation (Sender — Layer 7 → 1)</div>
+          <div id="encapsulation-visual"></div>
+          <div class="sec-lbl" style="margin-top:14px;">Decapsulation (Receiver — Layer 1 → 7)</div>
+          <div style="font-size:12px;color:var(--text2);line-height:2;">
+            Physical → strips preamble<br>
+            Data Link → strips Ethernet frame → checks MAC<br>
+            Network → strips IP header → checks dest IP<br>
+            Transport → strips TCP/UDP header → routes to port<br>
+            Application → reads payload data ✓
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PYTHON CODE PAGE ════════════════════════════════ -->
+  <div class="page" id="page-python">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🐍 Python — TCP Server Features</div><div class="card-sub">tcp_server.py — Multi-threaded with JSON protocol</div></div></div>
+        <div class="card-body">
+          <div id="python-features"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🐍 Python — UDP & Stop-and-Wait</div><div class="card-sub">udp_protocols.py — Datagram communication + CRC</div></div></div>
+        <div class="card-body">
+          <div id="python-udp-features"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ JAVA PAGE ════════════════════════════════════════ -->
+  <div class="page" id="page-java">
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">☕ Java — Multi-Client TCP Chat Server</div><div class="card-sub">NetPulseChatServer.java — Thread pool, broadcast messaging, custom protocol</div></div><span class="lang-tag java" style="padding:4px 10px;">Java 17</span></div>
+      <div class="card-body">
+        <div class="g3" style="margin-bottom:16px;">
+          ${[['ExecutorService','Thread pool (20 workers) — avoids spawning unlimited threads','var(--amber)'],['ConcurrentHashMap','Thread-safe session registry — no race conditions','var(--cyan)'],['Custom Protocol','TYPE|SENDER|RECIPIENT|CONTENT wire format over TCP','var(--teal)']].map(([t,d,c])=>`<div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid ${c};border-radius:0 8px 8px 0;padding:12px 14px;"><div style="font-size:12px;font-weight:700;color:${c};margin-bottom:4px;">${t}</div><div style="font-size:11px;color:var(--text2);">${d}</div></div>`).join('')}
+        </div>
+        <div class="code-header">NetPulseChatServer.java <span class="lang-tag java">Java 17</span></div>
+        <div class="code" style="border-radius:0;border:none;border-top:1px solid var(--border);">
+<span class="cmt">// Thread pool — OSI Layer 4 + App Layer pattern</span>
+<span class="cls">ExecutorService</span> pool =
+    <span class="cls">Executors</span>.<span class="fn">newFixedThreadPool</span>(<span class="num">20</span>);
+
+<span class="kw">while</span> (!serverSocket.<span class="fn">isClosed</span>()) {
+    <span class="cls">Socket</span> client = serverSocket.<span class="fn">accept</span>();
+    client.<span class="fn">setKeepAlive</span>(<span class="kw">true</span>);
+    client.<span class="fn">setTcpNoDelay</span>(<span class="kw">true</span>); <span class="cmt">// Disable Nagle</span>
+    <span class="cls">ClientSession</span> session = <span class="kw">new</span> <span class="cls">ClientSession</span>(client, <span class="kw">this</span>);
+    pool.<span class="fn">execute</span>(session);
+}
+
+<span class="cmt">// Thread-safe broadcast to all connected clients</span>
+<span class="kw">public void</span> <span class="fn">broadcast</span>(<span class="cls">ChatMessage</span> msg, <span class="cls">ClientSession</span> exclude) {
+    sessions.<span class="fn">values</span>().<span class="fn">stream</span>()
+        .<span class="fn">filter</span>(s -> s != exclude)
+        .<span class="fn">forEach</span>(s -> s.<span class="fn">send</span>(msg));
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ C PAGE ══════════════════════════════════════════ -->
+  <div class="page" id="page-clang">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🔵 C — POSIX Socket API</div><div class="card-sub">The foundation of all socket programming</div></div><span class="lang-tag c" style="background:rgba(139,92,246,.15);color:#a78bfa;padding:4px 10px;">C Language</span></div>
+        <div class="card-body" style="padding:0;">
+          <div class="code-header">netpulse_server.c <span class="lang-tag c" style="background:rgba(139,92,246,.15);color:#a78bfa;">C99 / POSIX</span></div>
+          <div class="code" style="border-radius:0;border:none;">
+<span class="cmt">/* TCP Socket Lifecycle in C */</span>
+
+<span class="cmt">/* 1. Create socket */</span>
+<span class="kw">int</span> fd = <span class="fn">socket</span>(AF_INET, SOCK_STREAM, <span class="num">0</span>);
+
+<span class="cmt">/* 2. Set options (avoid ADDRESS IN USE) */</span>
+<span class="kw">int</span> opt = <span class="num">1</span>;
+<span class="fn">setsockopt</span>(fd, SOL_SOCKET,
+    SO_REUSEADDR, &opt, <span class="kw">sizeof</span>(opt));
+
+<span class="cmt">/* 3. Bind — attach port number */</span>
+<span class="kw">struct</span> sockaddr_in addr = {
+    .sin_family      = AF_INET,
+    .sin_addr.s_addr = INADDR_ANY,
+    .sin_port        = <span class="fn">htons</span>(<span class="num">9200</span>)  <span class="cmt">/* byte order! */</span>
+};
+<span class="fn">bind</span>(fd, (<span class="kw">struct</span> sockaddr*)&addr, <span class="kw">sizeof</span>(addr));
+
+<span class="cmt">/* 4. Listen — mark as passive */</span>
+<span class="fn">listen</span>(fd, <span class="num">5</span>); <span class="cmt">/* backlog = 5 */</span>
+
+<span class="cmt">/* 5. Accept + thread per client */</span>
+<span class="kw">while</span> (<span class="num">1</span>) {
+    <span class="kw">int</span> client = <span class="fn">accept</span>(fd, &cli_addr, &len);
+    <span class="fn">pthread_create</span>(&tid, NULL,
+        handle_client, &clients[slot]);
+    <span class="fn">pthread_detach</span>(tid); <span class="cmt">/* auto-cleanup */</span>
+}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📐 C Concepts Demonstrated</div></div>
+        <div class="card-body" id="c-concepts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ BASH PAGE ════════════════════════════════════════ -->
+  <div class="page" id="page-bash">
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">🖥 Bash — Network Diagnostic Suite</div><div class="card-sub">netpulse_diag.sh — 9 diagnostic commands</div></div><span class="lang-tag bash" style="padding:4px 10px;">Bash</span></div>
+      <div class="card-body">
+        <div class="g3" id="bash-commands" style="margin-bottom:16px;"></div>
+        <div class="code-header">netpulse_diag.sh usage <span class="lang-tag bash">Bash 5</span></div>
+        <div class="code" style="border-radius:0;border:none;border-top:1px solid var(--border);">
+$ chmod +x bash/netpulse_diag.sh
+$ ./netpulse_diag.sh <span class="kw">ping</span> 8.8.8.8 10      <span class="cmt"># ICMP ping analysis</span>
+$ ./netpulse_diag.sh <span class="kw">trace</span> 8.8.8.8         <span class="cmt"># Hop-by-hop routing</span>
+$ ./netpulse_diag.sh <span class="kw">tcp</span>                    <span class="cmt"># TCP state analysis</span>
+$ ./netpulse_diag.sh <span class="kw">dns</span>                    <span class="cmt"># DNS resolution timing</span>
+$ ./netpulse_diag.sh <span class="kw">interfaces</span>             <span class="cmt"># NIC configuration</span>
+$ ./netpulse_diag.sh <span class="kw">bandwidth</span> eth0         <span class="cmt"># Live traffic monitor</span>
+$ ./netpulse_diag.sh <span class="kw">portscan</span> 127.0.0.1    <span class="cmt"># TCP port scan</span>
+$ ./netpulse_diag.sh <span class="kw">osi</span>                    <span class="cmt"># OSI model display</span>
+$ ./netpulse_diag.sh <span class="kw">report</span>                 <span class="cmt"># Full diagnostic report</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SQL DATABASE PAGE ═══════════════════════════════ -->
+  <div class="page" id="page-database">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🗄 SQL — Network Logs Database</div></div><span class="lang-tag sql" style="padding:4px 10px;">MySQL 8.0</span></div>
+        <div class="card-body">
+          <div class="sec-lbl">Schema (6 Tables)</div>
+          <div id="db-schema"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">🔍 Sample SQL Queries</div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="code-header">netpulse_db.sql <span class="lang-tag sql">SQL</span></div>
+          <div class="code" style="border-radius:0;border:none;">
+<span class="cmt">-- Top protocols by bandwidth</span>
+<span class="kw">SELECT</span> protocol,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> connections,
+       <span class="fn">ROUND</span>(<span class="fn">SUM</span>(bytes_sent+bytes_received)/<span class="num">1024</span>/<span class="num">1024</span>, <span class="num">2</span>)
+         <span class="kw">AS</span> total_MB,
+       <span class="fn">AVG</span>(rtt_ms) <span class="kw">AS</span> avg_rtt_ms
+<span class="kw">FROM</span> connections
+<span class="kw">GROUP BY</span> protocol
+<span class="kw">ORDER BY</span> total_MB <span class="kw">DESC</span>;
+
+<span class="cmt">-- DNS cache efficiency per domain</span>
+<span class="kw">SELECT</span> domain_name,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_queries,
+       <span class="fn">SUM</span>(cached) <span class="kw">AS</span> cache_hits,
+       <span class="fn">CONCAT</span>(<span class="fn">ROUND</span>(<span class="fn">SUM</span>(cached)/<span class="fn">COUNT</span>(*)*<span class="num">100</span>,<span class="num">1</span>),<span class="str">'%'</span>)
+         <span class="kw">AS</span> hit_rate
+<span class="kw">FROM</span> dns_queries
+<span class="kw">GROUP BY</span> domain_name
+<span class="kw">ORDER BY</span> hit_rate <span class="kw">DESC</span>;
+
+<span class="cmt">-- Stored procedure: log connection</span>
+<span class="kw">CALL</span> <span class="fn">log_connection</span>(
+    <span class="str">'192.168.1.10'</span>, <span class="str">'192.168.1.1'</span>,
+    <span class="str">'TCP'</span>, <span class="num">54321</span>, <span class="num">9000</span>
+);</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PROTOCOL SIMULATOR ══════════════════════════════ -->
+  <div class="page" id="page-simulator">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">⚡ Protocol Simulator</div><div class="card-sub">Simulate TCP & UDP message exchange step-by-step</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Protocol</label>
+            <select id="sim-protocol"><option value="tcp">TCP (Reliable)</option><option value="udp">UDP (Unreliable)</option></select>
+          </div>
+          <div class="fg"><label>Message to Send</label><input id="sim-msg" value="Hello from CSC 417!"></div>
+          <div class="fg"><label>Packet Loss (%)</label>
+            <input type="range" id="sim-loss" min="0" max="40" value="10" oninput="this.nextElementSibling.textContent=this.value+'%'">
+            <span style="font-family:'Space Mono',monospace;color:var(--teal);font-size:13px;">10%</span>
+          </div>
+          <button class="btn btn-teal" onclick="runSimulator()">▶ Send Transmission</button>
+          <div id="sim-output" style="margin-top:14px;font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.9;"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📊 Protocol Statistics</div></div>
+        <div class="card-body" id="sim-stats">
+          <div style="color:var(--text2);text-align:center;padding:30px;">Run a simulation to see statistics</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ NETWORK CALCULATOR ══════════════════════════════ -->
+  <div class="page" id="page-calc">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🧮 Subnet Calculator</div><div class="card-sub">IPv4 CIDR notation subnet analysis</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>IP Address</label><input id="calc-ip" value="192.168.1.0" placeholder="e.g. 192.168.1.0"></div>
+          <div class="fg"><label>CIDR Prefix (subnet bits)</label>
+            <input type="range" id="calc-cidr" min="8" max="30" value="24" oninput="updateCIDR();calcSubnet()">
+            <div style="text-align:center;font-family:'Space Mono',monospace;color:var(--teal);font-size:18px;margin-top:4px;">/<span id="cidr-display">24</span></div>
+          </div>
+          <button class="btn btn-teal" onclick="calcSubnet()">⚡ Calculate</button>
+          <div id="subnet-output" style="margin-top:14px;"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📡 Bandwidth & Latency Calculator</div></div>
+        <div class="card-body">
+          <div class="fg"><label>Bandwidth (Mbps)</label><input type="number" id="bw-mbps" value="100" min="1" oninput="calcBandwidth()"></div>
+          <div class="fg"><label>File Size (MB)</label><input type="number" id="bw-mb" value="500" min="1" oninput="calcBandwidth()"></div>
+          <div class="fg"><label>Round-Trip Distance (km)</label><input type="number" id="bw-dist" value="1000" min="1" oninput="calcBandwidth()"></div>
+          <div id="bw-output" style="margin-top:14px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end content -->
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ NAV ════════════════════════════════════════════════
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el) el.classList.add('active');
+  const meta={
+    home:['Network Dashboard','CSC 417: Data Communication — Multi-Language Network Lab'],
+    osi:['OSI 7-Layer Model','Open Systems Interconnection reference model'],
+    tcp:['TCP Protocol','Transmission Control Protocol — reliable connection-oriented transport'],
+    udp:['UDP Protocol','User Datagram Protocol — fast connectionless transport'],
+    packets:['Packet Structure','IP headers, encapsulation, network byte order (C language)'],
+    python:['Python Network Servers','TCP/UDP implementations — socket programming in Python 3'],
+    java:['Java Chat Server','Multi-client TCP chat — thread pool, broadcast messaging'],
+    clang:['C Socket Programming','POSIX socket API — foundation of all network programming'],
+    bash:['Bash Diagnostics','Network diagnostic suite — ping, traceroute, port scanning'],
+    database:['SQL Network Logs','MySQL database for network events, packets, DNS queries'],
+    simulator:['Protocol Simulator','Step-by-step TCP/UDP transmission simulation'],
+    calc:['Network Calculator','Subnet, bandwidth, and latency calculations'],
+  };
+  const[t,s]=meta[page]||['NetPulse',''];
+  document.getElementById('page-title').textContent=t;
+  document.getElementById('page-sub').textContent=s;
+  const renders={home:renderHome,osi:renderOSI,tcp:renderTCP,udp:renderUDP,packets:renderPackets,python:renderPython,java:()=>{},clang:renderC,bash:renderBash,database:renderDB,calc:()=>{calcSubnet();calcBandwidth();}};
+  if(renders[page]) setTimeout(renders[page],50);
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ══ HOME / HANDSHAKE ════════════════════════════════════
+function renderHome() {
+  animateHandshake();
+}
+
+function animateHandshake() {
+  const steps=[
+    {from:'Client',to:'Server',msg:'SYN (seq=100)',col:'var(--cyan)',note:'Step 1: Client initiates — sends SYN'},
+    {from:'Server',to:'Client',msg:'SYN-ACK (seq=200, ack=101)',col:'var(--green)',note:'Step 2: Server acknowledges + sends its SYN'},
+    {from:'Client',to:'Server',msg:'ACK (ack=201)',col:'var(--teal)',note:'Step 3: Client acknowledges — connection ESTABLISHED ✓'},
+    {from:'Both',to:'Both',msg:'DATA TRANSFER',col:'var(--amber)',note:'Three-way handshake complete — data flows'},
+  ];
+  const el=document.getElementById('handshake-display');
+  el.innerHTML='';
+  steps.forEach((step,i)=>{
+    setTimeout(()=>{
+      const arrow=step.from==='Client'?'→':'←';
+      const div=document.createElement('div');
+      div.style.cssText=`opacity:0;transition:opacity .5s;`;
+      div.innerHTML=`<span style="color:${step.col};font-weight:700;">${step.from} ${arrow} ${step.to}: </span><span style="color:var(--text)">[${step.msg}]</span>  <span style="color:var(--text2);font-size:10px;">${step.note}</span>`;
+      el.appendChild(div);
+      requestAnimationFrame(()=>{requestAnimationFrame(()=>{div.style.opacity='1';});});
+    }, i*700);
+  });
+}
+
+function animateFourWay() {
+  const steps=[
+    {from:'Client',msg:'FIN (seq=500)',col:'var(--rose)',note:'Client initiates close — sends FIN'},
+    {from:'Server',msg:'ACK (ack=501)',col:'var(--amber)',note:'Server acknowledges client FIN'},
+    {from:'Server',msg:'FIN (seq=800)',col:'var(--orange)',note:'Server sends its own FIN'},
+    {from:'Client',msg:'ACK (ack=801)',col:'var(--green)',note:'Client ACKs → enters TIME_WAIT → CLOSED ✓'},
+  ];
+  const el=document.getElementById('handshake-display');
+  el.innerHTML='<div style="color:var(--rose);font-weight:700;margin-bottom:6px;">TCP Four-Way Termination</div>';
+  steps.forEach((step,i)=>{
+    setTimeout(()=>{
+      const div=document.createElement('div');
+      div.innerHTML=`<span style="color:${step.col};font-weight:700;">${step.from}: </span><span style="color:var(--text)">[${step.msg}]</span>  <span style="color:var(--text2);font-size:10px;">${step.note}</span>`;
+      el.appendChild(div);
+    }, i*700);
+  });
+}
+
+// ══ OSI MODEL ════════════════════════════════════════════
+const osiData=[
+  {n:7,name:'Application',proto:'HTTP, HTTPS, FTP, SMTP, DNS, SSH, WebSocket',pdu:'Data',device:'Browser, App',col:'#818cf8',desc:'The layer closest to the user. Provides network services directly to end-users. Protocols like HTTP (port 80) and HTTPS (port 443) operate here.',examples:['Web browsing (HTTP/HTTPS)','Email (SMTP/IMAP)','DNS name resolution','SSH remote access']},
+  {n:6,name:'Presentation',proto:'SSL/TLS, JPEG, MPEG, ASCII, Base64',pdu:'Data',device:'Gateway',col:'#a78bfa',desc:'Translates data between the application and network formats. Handles encryption (SSL/TLS), data compression, and character encoding.',examples:['TLS/SSL encryption','JPEG image compression','ASCII ↔ Unicode conversion']},
+  {n:5,name:'Session',proto:'NetBIOS, RPC, SQL, PPTP, SIP',pdu:'Data',device:'Gateway',col:'#c084fc',desc:'Manages sessions (connections) between applications. Establishes, maintains, and terminates sessions.',examples:['Login sessions','NetBIOS sessions','Video call session (SIP)']},
+  {n:4,name:'Transport',proto:'TCP, UDP, SCTP, DCCP',pdu:'Segment / Datagram',device:'Firewall, Load Balancer',col:'#00d4b4',desc:'Provides end-to-end communication. TCP guarantees reliable, ordered delivery with flow control. UDP is fast but unreliable.',examples:['TCP port 9000 (NetPulse)','UDP port 53 (DNS)','TCP port 443 (HTTPS)']},
+  {n:3,name:'Network',proto:'IPv4, IPv6, ICMP, OSPF, BGP, ARP',pdu:'Packet',device:'Router',col:'#38bdf8',desc:'Handles logical addressing (IP addresses) and routing. IP packets hop from router to router using routing tables.',examples:['IPv4 addressing','ICMP ping (Layer 3)','Traceroute hop analysis']},
+  {n:2,name:'Data Link',proto:'Ethernet, WiFi (802.11), PPP, ARP, MAC',pdu:'Frame',device:'Switch, NIC',col:'#34d399',desc:'Handles physical addressing (MAC addresses) and framing. Ethernet frames are the most common Layer 2 format.',examples:['Ethernet frame (1500 byte MTU)','WiFi 802.11 frames','MAC address resolution (ARP)']},
+  {n:1,name:'Physical',proto:'RJ45, Fiber, Radio, Coaxial, USB',pdu:'Bit (0 or 1)',device:'Hub, Repeater, NIC',col:'#fbbf24',desc:'The physical medium for transmitting raw bits. Deals with electrical signals, light pulses, or radio waves.',examples:['Ethernet cable (Cat6)','Fiber optic (1Gbps–100Gbps)','WiFi radio waves (2.4/5GHz)']},
+];
+
+function renderOSI() {
+  document.getElementById('osi-layers').innerHTML=osiData.map(l=>`
+    <div class="osi-layer" style="background:${l.col}18;border:1px solid ${l.col}44;" onclick="showOSIDetail(${l.n})">
+      <div class="osi-num" style="color:${l.col};">${l.n}</div>
+      <div class="osi-name" style="color:${l.col};">${l.name}</div>
+      <div class="osi-proto" style="color:var(--text2);font-size:11.5px;">${l.proto.split(',').slice(0,3).join(', ')}</div>
+      <div class="osi-pdu" style="color:var(--text3);font-size:10px;">${l.pdu}</div>
+    </div>`).join('');
+}
+
+function showOSIDetail(n) {
+  const l=osiData.find(x=>x.n===n);
+  if(!l) return;
+  document.getElementById('osi-detail-title').textContent=`Layer ${l.n}: ${l.name}`;
+  document.getElementById('osi-detail').innerHTML=`
+    <div style="background:${l.col}14;border:1px solid ${l.col}33;border-radius:8px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:12.5px;color:var(--text);line-height:1.6;">${l.desc}</div>
+    </div>
+    <div class="sec-lbl">Key Protocols</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">${l.proto.split(',').map(p=>`<span style="background:${l.col}18;color:${l.col};border:1px solid ${l.col}33;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;font-family:'Space Mono',monospace;">${p.trim()}</span>`).join('')}</div>
+    <div class="sec-lbl">Real-World Examples</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">${l.examples.map(e=>`<div style="display:flex;gap:8px;font-size:12px;"><span style="color:${l.col};">▸</span><span style="color:var(--text2);">${e}</span></div>`).join('')}</div>
+    <div style="margin-top:14px;padding:10px 12px;background:var(--s2);border-radius:7px;font-size:11.5px;"><span style="color:var(--text2);">PDU at this layer: </span><span style="color:${l.col};font-weight:700;font-family:'Space Mono',monospace;">${l.pdu}</span>  |  <span style="color:var(--text2);">Device: </span><span style="color:var(--text);font-weight:600;">${l.device}</span></div>`;
+}
+
+// ══ TCP PAGE ════════════════════════════════════════════
+function renderTCP() {
+  const flags=[['SYN','Synchronize — initiate connection','var(--cyan)'],['ACK','Acknowledge — confirm receipt','var(--green)'],['FIN','Finish — close connection','var(--rose)'],['RST','Reset — abort connection','var(--amber)'],['PSH','Push — send data immediately','var(--violet)'],['URG','Urgent — prioritize data','var(--orange)']];
+  document.getElementById('tcp-flags-display').innerHTML=flags.map(([f,d,c])=>`<div style="background:${c}15;border:1px solid ${c}44;border-radius:6px;padding:8px 12px;cursor:help;" title="${d}"><span style="color:${c};font-weight:800;font-family:'Space Mono',monospace;font-size:12px;">${f}</span><div style="font-size:10px;color:var(--text2);margin-top:2px;">${d}</div></div>`).join('');
+  const states=['CLOSED','LISTEN','SYN_SENT','SYN_RECEIVED','ESTABLISHED','FIN_WAIT_1','FIN_WAIT_2','CLOSE_WAIT','LAST_ACK','TIME_WAIT'];
+  document.getElementById('tcp-states-display').innerHTML=states.map(st=>`<div class="tcp-state ${st==='ESTABLISHED'?'hl-green':''}" title="TCP connection state">${st}</div>`).join('');
+}
+
+// ══ UDP PAGE ════════════════════════════════════════════
+function renderUDP() {
+  const rows=[['Connection','3-way handshake','None (connectionless)'],['Reliability','Guaranteed delivery','Best-effort, may lose'],['Ordering','In-order delivery','No ordering'],['Speed','Slower (overhead)','Faster (minimal)'],['Header','20–60 bytes','8 bytes fixed'],['Flow Control','Yes (window)','No'],['Use Cases','HTTP,SSH,FTP,Email','DNS,Video,VoIP,Gaming']];
+  document.getElementById('tcp-udp-table').innerHTML=rows.map(([f,t,u])=>`<tr>
+    <td style="padding:9px 12px;border:1px solid var(--border);color:var(--text2);">${f}</td>
+    <td style="padding:9px 12px;border:1px solid var(--border);text-align:center;color:#60a5fa;font-family:'Space Mono',monospace;font-size:11px;">${t}</td>
+    <td style="padding:9px 12px;border:1px solid var(--border);text-align:center;color:var(--amber);font-family:'Space Mono',monospace;font-size:11px;">${u}</td>
+  </tr>`).join('');
+}
+
+function updateLoss(){document.getElementById('loss-display').textContent=document.getElementById('loss-slider').value;}
+
+function runStopWait() {
+  const loss=parseInt(document.getElementById('loss-slider').value)/100;
+  const n=parseInt(document.getElementById('frames-count').value)||5;
+  const out=document.getElementById('stopwait-output');
+  out.innerHTML='';
+  let totalTx=0, retrans=0;
+  const frames=['Hello','CSC417','NetPulse','SIWES','Done!','UDP!','Stop&Wait','ARQ'].slice(0,n);
+  let delay=0;
+  frames.forEach((frame,i)=>{
+    const seq=i%2;
+    let retried=false;
+    const lost=Math.random()<loss;
+    const ackLost=!lost&&Math.random()<loss;
+    setTimeout(()=>{
+      totalTx++;
+      if(lost){retrans++;out.innerHTML+=`<div>→ TX Frame ${i+1}[${seq}]: "${frame}" <span style="color:var(--rose)">✗ LOST</span></div>`;setTimeout(()=>{totalTx++;retrans++;out.innerHTML+=`<div style="color:var(--amber)">↺ ReTX Frame ${i+1}[${seq}] → <span style="color:var(--green)">← ACK[${seq}] ✓</span></div>`;},400);}
+      else if(ackLost){retrans++;out.innerHTML+=`<div>→ TX Frame ${i+1}[${seq}]: "${frame}" <span style="color:var(--orange)">ACK LOST ✗</span></div>`;setTimeout(()=>{totalTx++;out.innerHTML+=`<div style="color:var(--amber)">↺ ReTX → <span style="color:var(--green)">← ACK[${seq}] ✓</span></div>`;},400);}
+      else{out.innerHTML+=`<div>→ TX Frame ${i+1}[${seq}]: "${frame}" <span style="color:var(--green)">← ACK[${seq}] ✓</span></div>`;}
+      if(i===frames.length-1){setTimeout(()=>{const eff=Math.round(frames.length/totalTx*100);out.innerHTML+=`<div style="margin-top:8px;color:var(--teal)">━━━ Stats: ${frames.length} delivered | ${totalTx} sent | ${retrans} retransmit | Efficiency: ${eff}%</div>`;},800);}
+    }, delay);
+    delay+=lost||ackLost?900:500;
+  });
+}
+
+// ══ PACKETS PAGE ════════════════════════════════════════
+function renderPackets() {
+  const layers=[
+    {name:'Application Data',data:'"GET /index.html HTTP/1.1\\r\\n..."',col:'#818cf8'},
+    {name:'+ TCP Header (20B)',data:'SrcPort:52341 | DstPort:80 | SEQ | ACK | Flags',col:'var(--teal)'},
+    {name:'+ IP Header (20B)',data:'Src:192.168.1.10 | Dst:93.184.216.34 | TTL:64 | Proto:TCP',col:'var(--blue)'},
+    {name:'+ Ethernet Frame',data:'SrcMAC:AA:BB.. | DstMAC:CC:DD.. | EtherType:0x0800',col:'var(--green)'},
+    {name:'→ Physical Bits',data:'01001000 01100101 01101100 01101100 01101111...',col:'var(--amber)'},
+  ];
+  document.getElementById('encapsulation-visual').innerHTML=layers.map((l,i)=>`
+    <div style="background:${l.col}12;border:1px solid ${l.col}33;border-radius:7px;padding:10px 14px;margin-bottom:5px;${i>0?'margin-left:'+i*8+'px;':''}" >
+      <div style="font-size:11px;font-weight:700;color:${l.col};margin-bottom:3px;">Layer ${7-i}: ${l.name}</div>
+      <div style="font-size:10px;color:var(--text2);font-family:'Space Mono',monospace;">${l.data}</div>
+    </div>`).join('');
+}
+
+// ══ PYTHON PAGE ═════════════════════════════════════════
+function renderPython() {
+  const tcpF=[
+    {t:'Multi-threading','d':'Thread-per-client using threading.Thread — handles concurrent connections','c':'#60a5fa'},
+    {t:'JSON Protocol','d':'Application-layer protocol using JSON messages over TCP','c':'var(--green)'},
+    {t:'Length Framing','d':'4-byte length prefix solves TCP segment boundary problem','c':'var(--teal)'},
+    {t:'Command Handler','d':'ECHO, TIME, STATS, PING, QUIT commands processed','c':'var(--amber)'},
+    {t:'Connection Registry','d':'ConcurrentHashMap tracks all active sessions with stats','c':'#a78bfa'},
+    {t:'Logging','d':'Python logging module — file + console output with timestamps','c':'var(--orange)'},
+  ];
+  document.getElementById('python-features').innerHTML=tcpF.map(f=>`<div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid ${f.c};border-radius:0 8px 8px 0;padding:10px 13px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:${f.c};margin-bottom:3px;">${f.t}</div><div style="font-size:11px;color:var(--text2);">${f.d}</div></div>`).join('');
+  const udpF=[
+    {t:'Custom Packet Class','d':'NetPacket with CRC-16/CCITT checksum — binary struct serialization','c':'var(--amber)'},
+    {t:'Stop-and-Wait ARQ','d':'Simulates reliable transmission over unreliable channel with retransmission','c':'var(--teal)'},
+    {t:'DNS Query Builder','d':'Manually crafts RFC 1035 DNS query packets and sends via UDP port 53','c':'#a78bfa'},
+    {t:'Protocol Comparison','d':'TCP vs UDP bandwidth efficiency calculation with real metrics','c':'var(--green)'},
+  ];
+  document.getElementById('python-udp-features').innerHTML=udpF.map(f=>`<div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid ${f.c};border-radius:0 8px 8px 0;padding:10px 13px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:${f.c};margin-bottom:3px;">${f.t}</div><div style="font-size:11px;color:var(--text2);">${f.d}</div></div>`).join('');
+}
+
+// ══ C PAGE ═══════════════════════════════════════════════
+function renderC() {
+  const concepts=[
+    {t:'socket(AF_INET, SOCK_STREAM, 0)','d':'Create TCP socket — AF_INET=IPv4, SOCK_STREAM=TCP','c':'#a78bfa'},
+    {t:'htonl() / htons()','d':'Host-to-Network byte order — little-endian to big-endian','c':'var(--amber)'},
+    {t:'struct sockaddr_in','d':'IPv4 address structure — holds IP, port, address family','c':'var(--teal)'},
+    {t:'INADDR_ANY','d':'Listen on all available network interfaces (0.0.0.0)','c':'var(--green)'},
+    {t:'pthread_create()','d':'POSIX threads for concurrent client handling','c':'#60a5fa'},
+    {t:'struct ip_header','d':'Manual IPv4 header with __attribute__((packed))','c':'var(--orange)'},
+    {t:'IP Checksum (RFC1071)','d':'Internet checksum algorithm — one\'s complement sum','c':'var(--rose)'},
+    {t:'setsockopt(SO_REUSEADDR)','d':'Allows immediate port reuse after server restart','c':'var(--cyan)'},
+  ];
+  document.getElementById('c-concepts').innerHTML=concepts.map(c=>`<div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid ${c.c};border-radius:0 7px 7px 0;padding:9px 12px;margin-bottom:7px;"><div style="font-size:11px;font-family:'Space Mono',monospace;font-weight:700;color:${c.c};margin-bottom:3px;">${c.t}</div><div style="font-size:11px;color:var(--text2);">${c.d}</div></div>`).join('');
+}
+
+// ══ BASH PAGE ════════════════════════════════════════════
+function renderBash() {
+  const cmds=[
+    {cmd:'ping',d:'ICMP ping with RTT statistics and packet loss analysis','c':'var(--cyan)'},
+    {cmd:'trace',d:'Traceroute — hop-by-hop routing path with TTL','c':'var(--teal)'},
+    {cmd:'tcp',d:'TCP connection state machine analysis','c':'var(--blue)'},
+    {cmd:'dns',d:'DNS resolution with response timing per domain','c':'#a78bfa'},
+    {cmd:'interfaces',d':'Network interface config — IPs, MACs, MTU','c':'var(--green)'},
+    {cmd:'bandwidth',d':'Real-time TX/RX monitor from /proc/net/dev','c':'var(--amber)'},
+    {cmd:'portscan',d:'TCP connect scan across common ports','c':'var(--rose)'},
+    {cmd:'osi',d:'OSI 7-layer model reference table','c':'var(--orange)'},
+    {cmd:'report',d:'Full diagnostic report — all commands combined','c':'var(--violet)'},
+  ];
+  document.getElementById('bash-commands').innerHTML=cmds.map(c=>`<div style="background:var(--s2);border:1px solid var(--border);border-top:2px solid ${c.c};border-radius:8px;padding:12px 14px;"><div style="font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:${c.c};margin-bottom:4px;">./${c.cmd}</div><div style="font-size:10.5px;color:var(--text2);">${c.d}</div></div>`).join('');
+}
+
+// ══ DATABASE PAGE ════════════════════════════════════════
+function renderDB() {
+  const tables=[
+    {n:'network_nodes','d':'All network devices — IP, MAC, hostname, type','c':'var(--teal)'},
+    {n:'connections','d':'TCP/UDP connections with bytes, RTT, retransmissions','c':'#60a5fa'},
+    {n:'packets','d':'Individual packet captures with IP headers, TCP flags','c':'var(--green)'},
+    {n:'dns_queries','d':'DNS lookups with timing, cache hits, response codes','c':'#a78bfa'},
+    {n:'security_events','d':'Anomaly detection — port scans, DoS, MITM alerts','c':'var(--rose)'},
+    {n:'network_interfaces','d':'NIC cards — speed, duplex, MTU, bytes in/out','c':'var(--amber)'},
+  ];
+  document.getElementById('db-schema').innerHTML=tables.map(t=>`<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:center;"><span style="font-family:'Space Mono',monospace;font-size:11px;color:${t.c};min-width:160px;font-weight:700;">${t.n}</span><span style="font-size:11.5px;color:var(--text2);">${t.d}</span></div>`).join('');
+}
+
+// ══ SIMULATOR ════════════════════════════════════════════
+function runSimulator() {
+  const proto=document.getElementById('sim-protocol').value;
+  const msg=document.getElementById('sim-msg').value||'Hello';
+  const loss=parseInt(document.getElementById('sim-loss').value)/100;
+  const out=document.getElementById('sim-output');
+  let steps=[], sent=0, dropped=0, retrans=0;
+
+  if(proto==='tcp'){
+    steps=[
+      `<span style="color:var(--cyan)">→ [SYN]</span> Client initiates TCP handshake`,
+      `<span style="color:var(--green)">← [SYN-ACK]</span> Server responds`,
+      `<span style="color:var(--teal)">→ [ACK]</span> Connection ESTABLISHED`,
+      `<span style="color:var(--text)">→ [PSH,ACK]</span> DATA: "${msg}" (${msg.length} bytes)`,
+      `<span style="color:var(--green)">← [ACK]</span> Server acknowledged ${msg.length} bytes`,
+      `<span style="color:var(--amber)">← [PSH,ACK]</span> RESPONSE: "ECHO: ${msg}"`,
+      `<span style="color:var(--rose)">→ [FIN]</span> Client closing connection`,
+      `<span style="color:var(--orange)">← [FIN,ACK]</span> Server closing`,
+      `<span style="color:var(--green)">✓ TCP Connection Closed cleanly (4-way termination)</span>`,
+    ];
+    sent=1; dropped=0;
+  } else {
+    const lostPacket=Math.random()<loss;
+    if(lostPacket){dropped=1;steps=[
+      `<span style="color:var(--amber)">→ [UDP Datagram]</span> SENT: "${msg}" → 192.168.1.1:9001`,
+      `<span style="color:var(--rose)">✗ PACKET LOST</span> (simulated ${Math.round(loss*100)}% loss)`,
+      `<span style="color:var(--text2)">⚠ No ACK from server — UDP does NOT retransmit!</span>`,
+      `<span style="color:var(--orange)">⚡ UDP: Datagram dropped silently — application must handle!</span>`,
+    ];}else{sent=1;steps=[
+      `<span style="color:var(--amber)">→ [UDP Datagram]</span> SENT: "${msg}" → 192.168.1.1:9001`,
+      `<span style="color:var(--green)">✓ Datagram delivered</span> (no handshake, no ACK)`,
+      `<span style="color:var(--teal)">← [UDP Datagram]</span> Server echoed: "ECHO: ${msg}"`,
+      `<span style="color:var(--text2)">Note: No guarantee of delivery in production!</span>`,
+    ];}
+  }
+
+  out.innerHTML='';
+  steps.forEach((step,i)=>{
+    setTimeout(()=>{
+      out.innerHTML+=`<div>${step}</div>`;
+    },i*500);
+  });
+
+  setTimeout(()=>{
+    document.getElementById('sim-stats').innerHTML=`
+      <div class="g2">
+        ${[['Protocol',proto.toUpperCase(),'var(--teal)'],['Packets Sent',sent,'var(--green)'],['Packets Dropped',dropped,dropped>0?'var(--rose)':'var(--green)'],['Retransmits',proto==='tcp'?0:'-','var(--text2)']].map(([l,v,c])=>`<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:${c};font-family:'Space Mono',monospace;">${v}</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">${l}</div></div>`).join('')}
+      </div>`;
+  }, steps.length*500+300);
+}
+
+// ══ CALCULATOR ═══════════════════════════════════════════
+function updateCIDR(){document.getElementById('cidr-display').textContent=document.getElementById('calc-cidr').value;}
+
+function calcSubnet() {
+  const ipStr=document.getElementById('calc-ip').value;
+  const cidr=parseInt(document.getElementById('calc-cidr').value)||24;
+  const parts=ipStr.split('.').map(Number);
+  if(parts.length!==4||parts.some(p=>isNaN(p)||p<0||p>255)){document.getElementById('subnet-output').innerHTML='<div style="color:var(--rose);">Invalid IP address</div>';return;}
+  const ip32=parts.reduce((acc,b,i)=>acc|(b<<(24-i*8)),0)>>>0;
+  const mask=cidr===0?0:(0xFFFFFFFF<<(32-cidr))>>>0;
+  const network=(ip32&mask)>>>0;
+  const broadcast=(network|(~mask>>>0))>>>0;
+  const first=(network+1)>>>0;
+  const last=(broadcast-1)>>>0;
+  const hosts=Math.pow(2,32-cidr)-2;
+  const toIP=n=>[(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+  document.getElementById('subnet-output').innerHTML=`
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'Space Mono',monospace;font-size:12px;line-height:2.2;">
+      <div><span style="color:var(--text2);">Network:   </span><span style="color:var(--teal);">${toIP(network)}/${cidr}</span></div>
+      <div><span style="color:var(--text2);">Subnet Mask:</span><span style="color:var(--green);"> ${toIP(mask)}</span></div>
+      <div><span style="color:var(--text2);">Broadcast: </span><span style="color:var(--rose);"> ${toIP(broadcast)}</span></div>
+      <div><span style="color:var(--text2);">First Host:</span><span style="color:var(--text);"> ${toIP(first)}</span></div>
+      <div><span style="color:var(--text2);">Last Host: </span><span style="color:var(--text);"> ${toIP(last)}</span></div>
+      <div><span style="color:var(--text2);">Usable Hosts:</span><span style="color:var(--amber);"> ${hosts.toLocaleString()}</span></div>
+    </div>`;
+}
+
+function calcBandwidth() {
+  const bwMbps=parseFloat(document.getElementById('bw-mbps').value)||100;
+  const fileMB=parseFloat(document.getElementById('bw-mb').value)||500;
+  const distKm=parseFloat(document.getElementById('bw-dist').value)||1000;
+  const transferSec=(fileMB*8)/bwMbps;
+  const propDelay=(distKm/200000)*1000; // speed of light in fiber ~200,000 km/s
+  const rttMs=propDelay*2;
+  const bwDelay=(fileMB*1024*1024*8)/(bwMbps*1e6);
+  document.getElementById('bw-output').innerHTML=`
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12.5px;line-height:2.3;">
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2);">Transfer Time:</span><span style="color:var(--teal);font-family:'Space Mono',monospace;font-weight:700;">${transferSec.toFixed(2)}s</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2);">Propagation Delay:</span><span style="color:var(--green);font-family:'Space Mono',monospace;">${propDelay.toFixed(2)} ms</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2);">Round-Trip Time:</span><span style="color:var(--amber);font-family:'Space Mono',monospace;">${rttMs.toFixed(2)} ms</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2);">Bandwidth × Delay:</span><span style="color:var(--violet);font-family:'Space Mono',monospace;">${Math.round(bwMbps*1e6*rttMs/1000/8).toLocaleString()} bytes</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2);">Throughput:</span><span style="color:var(--cyan);font-family:'Space Mono',monospace;">${bwMbps} Mbps</span></div>
+    </div>`;
+}
+
+// ══ INIT ═════════════════════════════════════════════════
+renderHome();
+setTimeout(()=>{calcSubnet();calcBandwidth();},100);
+</script>
+</body>
+</html>

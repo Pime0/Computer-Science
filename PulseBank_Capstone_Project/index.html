@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<title>PulseBank — Digital Banking Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@300;400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#1a56ff;--brand2:#0d3ed4;--brand-glow:rgba(26,86,255,.2);
+  --gold:#f0b429;--gold2:#d49b1e;
+  --bg:#05060d;--s1:#08091a;--s2:#0d1028;--s3:#121435;--s4:#192050;
+  --border:#1e2550;--border2:#2a3370;
+  --green:#00d68f;--amber:#ffaa00;--rose:#ff4560;--cyan:#17c3ce;--violet:#7c3aed;
+  --text:#e8edff;--text2:#5a6fa8;--text3:#232d52;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:256px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;z-index:20;}
+.sidebar::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,var(--brand),var(--violet),transparent 70%);}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);}
+.logo-mark{display:flex;align-items:center;gap:12px;margin-bottom:5px;}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--brand),#5b8aff);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 6px 20px var(--brand-glow);}
+.logo-text{font-size:22px;font-weight:900;letter-spacing:-.5px;}
+.logo-text span{color:var(--brand);}
+.logo-tagline{font-size:10px;color:var(--text3);letter-spacing:1.8px;text-transform:uppercase;}
+.acc-pill{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin:14px 16px 0;cursor:pointer;transition:all .2s;}
+.acc-pill:hover{border-color:var(--brand);}
+.acc-av{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--violet));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0;}
+.acc-name{font-size:13px;font-weight:700;}
+.acc-num{font-size:10.5px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+.nav{padding:14px 12px;flex:1;overflow-y:auto;}
+.nav-g{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:10px 10px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .18s;font-size:13px;color:var(--text2);border:1px solid transparent;margin-bottom:2px;font-weight:500;position:relative;}
+.nav-item:hover{background:var(--s2);color:var(--text);border-color:var(--border);}
+.nav-item.active{background:linear-gradient(135deg,rgba(26,86,255,.12),rgba(91,138,255,.06));color:#fff;border-color:rgba(26,86,255,.35);font-weight:700;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--brand);border-radius:0 3px 3px 0;}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--rose);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;}
+.nav-badge.gold{background:var(--gold);color:#000;}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);}
+.sec-badge{display:flex;align-items:center;gap:8px;background:rgba(0,214,143,.07);border:1px solid rgba(0,214,143,.2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--green);}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(.8);opacity:.5;}}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;height:100vh;}
+.topbar{position:sticky;top:0;z-index:10;padding:14px 28px;background:rgba(5,6,13,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.page-title{font-size:22px;font-weight:800;letter-spacing:-.3px;}
+.page-sub{font-size:11.5px;color:var(--text2);margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.notif-btn{width:38px;height:38px;background:var(--s2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .18s;position:relative;}
+.notif-btn:hover{border-color:var(--brand);}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--rose);border-radius:50%;border:2px solid var(--bg);}
+.quick-btn{display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px var(--brand-glow);}
+.quick-btn:hover{background:var(--brand2);transform:translateY(-1px);}
+.content{padding:24px 28px;}
+.page{display:none;}.page.active{display:block;}
+
+/* LAYOUT */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:14px;font-weight:700;}
+.card-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.card-body{padding:20px;}
+
+/* BALANCE HERO */
+.bal-hero{background:linear-gradient(135deg,#0d1028 0%,#12144a 50%,#0a0c2a 100%);border:1px solid var(--border2);border-radius:18px;padding:28px;position:relative;overflow:hidden;margin-bottom:20px;}
+.bal-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(26,86,255,.18),transparent 70%);}
+.bal-hero::after{content:'';position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.12),transparent 70%);}
+.bal-label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.bal-amount{font-size:46px;font-weight:900;letter-spacing:-1px;background:linear-gradient(135deg,#fff 30%,#a0b4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.bal-sub{font-size:12px;color:var(--text2);margin-bottom:20px;}
+.bal-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.bal-btn{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.bal-btn-p{background:var(--brand);color:#fff;box-shadow:0 4px 14px var(--brand-glow);}
+.bal-btn-p:hover{background:var(--brand2);transform:translateY(-1px);}
+.bal-btn-g{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.12);}
+.bal-btn-g:hover{background:rgba(255,255,255,.13);}
+.acc-chips{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;}
+.acc-chip{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .2s;}
+.acc-chip.active,.acc-chip:hover{border-color:var(--brand);background:rgba(26,86,255,.1);}
+.chip-label{font-size:10px;color:var(--text2);}
+.chip-val{font-size:16px;font-weight:800;margin-top:2px;}
+
+/* STAT CARDS */
+.stat-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all .2s;}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;}
+.stat-val{font-size:26px;font-weight:900;letter-spacing:-.5px;}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:5px;}
+.stat-ch{font-size:11px;margin-top:5px;}
+
+/* TRANSACTIONS */
+.txn-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--border);transition:all .15s;cursor:pointer;}
+.txn-row:last-child{border-bottom:none;}
+.txn-row:hover{padding-left:6px;}
+.txn-icon-wrap{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.txn-name{font-size:13px;font-weight:700;}
+.txn-date{font-size:11px;color:var(--text2);margin-top:2px;}
+.txn-amount{font-size:14px;font-weight:800;text-align:right;}
+.txn-st{font-size:10px;color:var(--text2);margin-top:2px;text-align:right;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:6px;font-size:10.5px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.b-ok{background:rgba(0,214,143,.12);color:var(--green);border:1px solid rgba(0,214,143,.2);}
+.b-pend{background:rgba(255,170,0,.1);color:var(--amber);border:1px solid rgba(255,170,0,.2);}
+.b-err{background:rgba(255,69,96,.1);color:var(--rose);border:1px solid rgba(255,69,96,.2);}
+.b-info{background:rgba(23,195,206,.1);color:var(--cyan);border:1px solid rgba(23,195,206,.2);}
+.b-high{background:rgba(255,69,96,.15);color:var(--rose);}
+.b-med{background:rgba(255,170,0,.12);color:var(--amber);}
+.b-low{background:rgba(0,214,143,.1);color:var(--green);}
+
+/* FORM */
+input,select,textarea{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:10px;font-family:'Cabinet Grotesk',sans-serif;font-size:14px;padding:11px 14px;width:100%;transition:all .2s;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(26,86,255,.12);}
+label{font-size:11.5px;font-weight:700;color:var(--text2);letter-spacing:.4px;text-transform:uppercase;display:block;margin-bottom:6px;}
+.fg{margin-bottom:16px;}
+select option{background:var(--s2);}
+
+/* BUTTONS */
+.btn{padding:10px 20px;border-radius:10px;border:none;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:7px;}
+.btn-p{background:var(--brand);color:#fff;box-shadow:0 4px 14px var(--brand-glow);}
+.btn-p:hover{background:var(--brand2);transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-g:hover{background:var(--s2);color:var(--text);}
+.btn-ok{background:var(--green);color:#000;}
+.btn-err{background:var(--rose);color:#fff;}
+.btn-sm{padding:7px 13px;font-size:12px;}
+
+/* PROGRESS */
+.prog{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+
+/* KANBAN */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.kb-col{background:var(--s2);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.kb-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.kb-title{font-size:12px;font-weight:700;letter-spacing:.3px;}
+.kb-count{background:var(--s3);padding:2px 8px;border-radius:4px;font-size:10.5px;color:var(--text2);font-weight:700;}
+.kb-cards{padding:10px;min-height:160px;display:flex;flex-direction:column;gap:8px;}
+.kb-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:all .18s;}
+.kb-card:hover{border-color:var(--brand);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.kb-title-card{font-size:12px;font-weight:600;margin-bottom:8px;line-height:1.4;}
+.kb-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.kb-pts{font-size:10px;font-weight:700;color:var(--text3);background:var(--s3);padding:2px 6px;border-radius:3px;}
+
+/* FRAUD MATRIX */
+.fraud-matrix{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.m-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:pointer;transition:all .2s;}
+.m-cell:hover{transform:scale(1.1);}
+
+/* CODE */
+.code-box{background:#000;border:1px solid var(--border2);border-radius:10px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.85;word-break:break-all;}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--s2);border:1px solid var(--border);border-radius:18px;width:480px;max-width:92vw;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.7);animation:sIn .25s ease;}
+@keyframes sIn{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+.modal-title{font-size:19px;font-weight:800;margin-bottom:4px;}
+.modal-sub{font-size:12.5px;color:var(--text2);margin-bottom:22px;}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
+
+/* LOAN */
+.loan-result{background:linear-gradient(135deg,rgba(26,86,255,.1),rgba(91,138,255,.05));border:1px solid rgba(26,86,255,.25);border-radius:12px;padding:20px;}
+.loan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.loan-item{background:var(--s3);border-radius:8px;padding:12px;}
+.loan-lbl{font-size:10.5px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;}
+.loan-val{font-size:20px;font-weight:800;margin-top:4px;}
+
+/* FRAUD ALERT */
+.f-alert{background:linear-gradient(135deg,rgba(255,69,96,.08),rgba(255,69,96,.04));border:1px solid rgba(255,69,96,.25);border-left:4px solid var(--rose);border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
+.f-title{font-size:13px;font-weight:700;color:var(--rose);}
+.f-desc{font-size:11.5px;color:var(--text2);margin-top:3px;line-height:1.5;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:12px;padding:14px 20px;font-size:13px;z-index:9999;transform:translateX(200%);transition:transform .3s;max-width:340px;}
+.toast.show{transform:translateX(0);}
+.toast.error{border-left-color:var(--rose);}
+.toast.warn{border-left-color:var(--amber);}
+
+/* MISC */
+.sec-lbl{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin:0 0 12px;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">🏦</div>
+      <div><div class="logo-text">Pulse<span>Bank</span></div></div>
+    </div>
+    <div class="logo-tagline">Digital Banking — SIWES Capstone</div>
+  </div>
+
+  <div class="acc-pill">
+    <div class="acc-av">AO</div>
+    <div><div class="acc-name">Adebayo Olamide</div><div class="acc-num">PB-7823-4561</div></div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-g">Banking</div>
+    <div class="nav-item active" onclick="nav('dashboard',this)"><span class="nav-icon">⬡</span>Dashboard</div>
+    <div class="nav-item" onclick="nav('accounts',this)"><span class="nav-icon">💳</span>My Accounts</div>
+    <div class="nav-item" onclick="nav('transfer',this)"><span class="nav-icon">↗</span>Transfer</div>
+    <div class="nav-item" onclick="nav('transactions',this)"><span class="nav-icon">📋</span>Transactions</div>
+    <div class="nav-item" onclick="nav('loans',this)"><span class="nav-icon">🏠</span>Loans<span class="nav-badge gold">NEW</span></div>
+
+    <div class="nav-g">Security — CSC 434</div>
+    <div class="nav-item" onclick="nav('security',this)"><span class="nav-icon">🔐</span>Security Center</div>
+    <div class="nav-item" onclick="nav('fraud',this)"><span class="nav-icon">🧠</span>Fraud Detection<span class="nav-badge">2</span></div>
+
+    <div class="nav-g">All 6 Courses</div>
+    <div class="nav-item" onclick="nav('project',this)"><span class="nav-icon">📌</span>Project Board<span style="margin-left:auto;font-size:9.5px;color:var(--text3);">CSC436</span></div>
+    <div class="nav-item" onclick="nav('network',this)"><span class="nav-icon">📡</span>Network Status<span style="margin-left:auto;font-size:9.5px;color:var(--text3);">CSC417</span></div>
+    <div class="nav-item" onclick="nav('architecture',this)"><span class="nav-icon">🏗</span>Architecture<span style="margin-left:auto;font-size:9.5px;color:var(--text3);">CSC419</span></div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sec-badge">
+      <div class="pulse-dot"></div>
+      <div><div style="font-weight:700;">256-bit Encrypted</div><div style="font-size:9.5px;opacity:.7;">TLS 1.3 · JWT Active · MFA On</div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="ptitle">Dashboard</div>
+      <div class="page-sub" id="psub">Welcome back, Adebayo • All 6 courses integrated in one platform</div>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-btn" onclick="showToast('3 new notifications','')">🔔<div class="notif-dot"></div></div>
+      <button class="quick-btn" onclick="openModal()">↗ Quick Transfer</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="bal-hero">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+        <div>
+          <div class="bal-label">Total Portfolio Balance</div>
+          <div class="bal-amount">₦2,847,650.00</div>
+          <div class="bal-sub">+₦124,320 (+4.6%) this month • 3 accounts</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:var(--text2);">Account No.</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:1px;">PB-7823-4561</div>
+          <div style="margin-top:6px;"><span class="badge b-ok">● VERIFIED</span></div>
+        </div>
+      </div>
+      <div class="bal-actions">
+        <button class="bal-btn bal-btn-p" onclick="nav('transfer',null)">↗ Transfer</button>
+        <button class="bal-btn bal-btn-g" onclick="nav('accounts',null)">💳 Accounts</button>
+        <button class="bal-btn bal-btn-g" onclick="nav('loans',null)">🏦 Apply Loan</button>
+        <button class="bal-btn bal-btn-g" onclick="showToast('PDF statement sent to email!')">📄 Statement</button>
+      </div>
+      <div class="acc-chips">
+        <div class="acc-chip active"><div class="chip-label">Current</div><div class="chip-val" style="color:#fff;">₦1,850,200</div></div>
+        <div class="acc-chip"><div class="chip-label">Savings</div><div class="chip-val" style="color:var(--green);">₦847,450</div></div>
+        <div class="acc-chip"><div class="chip-label">Investment</div><div class="chip-val" style="color:var(--gold);">₦150,000</div></div>
+      </div>
+    </div>
+
+    <div class="g4" style="margin-bottom:20px;">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(26,86,255,.1);">💸</div>
+        <div class="stat-val" style="color:var(--brand);">₦3.2M</div>
+        <div class="stat-lbl">Total Sent (YTD)</div>
+        <div class="stat-ch" style="color:var(--green);">↑ 18% vs last year</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(0,214,143,.1);">📥</div>
+        <div class="stat-val" style="color:var(--green);">₦4.1M</div>
+        <div class="stat-lbl">Total Received (YTD)</div>
+        <div class="stat-ch" style="color:var(--green);">↑ 24% vs last year</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(255,170,0,.1);">📊</div>
+        <div class="stat-val" style="color:var(--amber);">47</div>
+        <div class="stat-lbl">Transactions This Month</div>
+        <div class="stat-ch" style="color:var(--amber);">12 pending</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(0,214,143,.08);">🛡</div>
+        <div class="stat-val" style="color:var(--green);">98.7%</div>
+        <div class="stat-lbl">Security Score</div>
+        <div class="stat-ch" style="color:var(--green);">All systems nominal</div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">📋 Recent Transactions</div><div class="card-sub">Last 7 days • CSC 410: Database</div></div>
+          <button class="btn btn-g btn-sm" onclick="nav('transactions',null)">View All →</button>
+        </div>
+        <div class="card-body" id="dash-txns"></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-head"><div class="card-title">📊 Monthly Spending</div></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:flex-end;gap:5px;height:80px;" id="spend-chart"></div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;">
+              <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">🧠 Fraud Alert — CSC 413</div></div><span class="badge b-err">2 Active</span></div>
+          <div class="card-body" id="dash-fraud"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All 6 Courses Banner -->
+    <div style="background:linear-gradient(135deg,rgba(26,86,255,.08),rgba(124,58,237,.06));border:1px solid rgba(26,86,255,.2);border-radius:14px;padding:20px;margin-top:4px;">
+      <div style="font-size:12px;font-weight:700;color:var(--brand);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">PulseBank — 6 Courses, 7 Languages, One Platform</div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;" id="courses-banner"></div>
+    </div>
+  </div>
+
+  <!-- ═══ ACCOUNTS ═══ -->
+  <div class="page" id="page-accounts">
+    <div class="g3" id="accounts-grid" style="margin-bottom:20px;"></div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">📈 Balance History — 6 Months</div></div>
+      <div class="card-body">
+        <div style="display:flex;align-items:flex-end;gap:6px;height:120px;" id="bal-history"></div>
+        <div style="margin-top:10px;display:flex;justify-content:space-between;font-size:10.5px;color:var(--text2);"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TRANSFER ═══ -->
+  <div class="page" id="page-transfer">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">↗ Send Money</div><div class="card-sub">Instant transfer • AES-256 encrypted • CSC 434</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>From Account</label>
+            <select id="t-from"><option value="current">Current Account — ₦1,850,200.00</option><option value="savings">Savings Account — ₦847,450.00</option></select>
+          </div>
+          <div class="fg"><label>Recipient Account Number</label>
+            <input type="text" id="t-to" placeholder="10-digit account number" maxlength="10" oninput="lookupAcc()">
+            <div id="t-lookup" style="font-size:12px;height:18px;margin-top:5px;"></div>
+          </div>
+          <div class="fg"><label>Amount (₦)</label><input type="number" id="t-amt" placeholder="0.00" oninput="updateFee()"></div>
+          <div class="fg"><label>Narration</label><input type="text" id="t-narr" placeholder="e.g. Rent payment June" maxlength="50"></div>
+          <div id="t-summary" style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--text2);">Enter amount to see fee breakdown</div>
+          <button class="btn btn-p" style="width:100%;justify-content:center;" onclick="doTransfer()">🔒 Confirm Transfer</button>
+          <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text2);">Protected by JWT · AES-256 · CSC 434</div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-head"><div class="card-title">⭐ Saved Beneficiaries</div></div>
+          <div class="card-body" id="beneficiaries"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">🔐 Transfer Security — CSC 434</div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:7px;" id="security-checks"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TRANSACTIONS ═══ -->
+  <div class="page" id="page-transactions">
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">📋 Transaction History</div><div class="card-sub">CSC 410: Full database of all financial activity</div></div>
+        <div style="display:flex;gap:8px;">
+          <select onchange="filterTxns(this.value)" style="width:auto;padding:8px 12px;font-size:12px;"><option value="">All Types</option><option>Credit</option><option>Debit</option><option>Transfer</option></select>
+          <button class="btn btn-g btn-sm" onclick="showToast('Exporting CSV...')">📥 Export</button>
+        </div>
+      </div>
+      <div style="padding:0;">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:10px 20px;background:var(--s2);border-bottom:1px solid var(--border);">
+          ${['Description','Date','Type','Amount','Status'].map(h=>`<div style="font-size:9.5px;font-weight:700;letter-spacing:1px;color:var(--text3);">${h}</div>`).join('')}
+        </div>
+        <div id="txn-table"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ LOANS ═══ -->
+  <div class="page" id="page-loans">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🏠 Loan Calculator</div><div class="card-sub">CSC 413: Discrete Math — Financial formula M = P[r(1+r)^n]/[(1+r)^n-1]</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Loan Amount (₦)</label><input type="number" id="l-amt" value="500000" oninput="calcLoan()"></div>
+          <div class="fg"><label>Interest Rate — <span id="rate-disp" style="color:var(--brand);">12%</span> per annum</label>
+            <input type="range" id="l-rate" min="5" max="30" value="12" oninput="document.getElementById('rate-disp').textContent=this.value+'%';calcLoan()" style="accent-color:var(--brand);">
+          </div>
+          <div class="fg"><label>Tenure</label>
+            <select id="l-tenure" onchange="calcLoan()">
+              <option value="12">12 months (1 year)</option>
+              <option value="24">24 months (2 years)</option>
+              <option value="36" selected>36 months (3 years)</option>
+              <option value="48">48 months (4 years)</option>
+              <option value="60">60 months (5 years)</option>
+            </select>
+          </div>
+          <div id="loan-result"></div>
+          <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:14px;" onclick="showToast('Loan application submitted! 24-48hr processing.')">📋 Apply for Loan</button>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-head"><div class="card-title">📐 Discrete Math Formula — CSC 413</div></div>
+          <div class="card-body">
+            <div class="code-box" style="color:var(--brand);font-size:11.5px;">
+M = P × [r(1+r)^n] / [(1+r)^n - 1]
+
+Where:
+  M = Monthly repayment
+  P = Principal (loan amount)
+  r = Monthly rate = annual% / 12 / 100
+  n = Number of months
+
+Geometric Series (Discrete Math):
+  Sum = a(1-r^n)/(1-r)
+  Applied to loan amortization ✓
+
+Example (₦500,000, 12%, 36 months):
+  r = 0.12/12 = 0.01
+  M = 500000 × [0.01(1.01)^36]
+          / [(1.01)^36 - 1]
+  M = ₦16,607.15 per month</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">🏦 Active Loans</div></div>
+          <div class="card-body" id="active-loans"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECURITY — CSC 434 ═══ -->
+  <div class="page" id="page-security">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🔐 Cryptography Lab — CSC 434</div><div class="card-sub">Live encryption demonstration</div></div></div>
+        <div class="card-body">
+          <div class="fg"><label>Plaintext Message</label><input type="text" id="c-plain" value="Transfer ₦50,000 to ACC-4521" oninput="runCrypto()"></div>
+          <div class="fg"><label>Secret Key</label><input type="text" id="c-key" value="PULSEBANK_KEY_2025" oninput="runCrypto()"></div>
+          <div style="margin-bottom:12px;">
+            <div class="sec-lbl">XOR Encrypted (Hex) — Ciphertext</div>
+            <div class="code-box" id="c-encrypted" style="color:var(--amber);"></div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div class="sec-lbl">SHA-256 Hash — Integrity Check</div>
+            <div class="code-box" id="c-hash" style="color:var(--cyan);font-size:10.5px;"></div>
+          </div>
+          <div style="background:rgba(26,86,255,.06);border:1px solid rgba(26,86,255,.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);">
+            ℹ️ Production uses AES-256-GCM with PBKDF2 key derivation. Passwords: bcrypt cost factor 12.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">🛡 OWASP Top 10 — Protections</div></div>
+        <div class="card-body" id="owasp-list" style="padding:10px 0;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">🔒 HTTP Security Headers — CSC 434</div></div>
+      <div class="card-body">
+        <div id="sec-headers"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FRAUD DETECTION — CSC 413 ═══ -->
+  <div class="page" id="page-fraud">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🧠 Graph-Based Fraud Detection — CSC 413</div><div class="card-sub">Discrete Math: Adjacency matrix of transaction network</div></div></div>
+        <div class="card-body">
+          <div class="sec-lbl">Transaction Network — Adjacency Matrix (5 accounts)</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Red = suspicious clustering. High edge weight = frequent transfers between same pair.</div>
+          <div class="fraud-matrix" id="fraud-matrix"></div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;font-size:11px;color:var(--text2);">
+            <span>🟢 Low (0–2)</span><span>🟡 Normal (3–5)</span><span>🟠 Watch (6–9)</span><span>🔴 Alert (10+)</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">📊 Risk Score Algorithm — CSC 413</div><div class="card-sub">Boolean logic + weighted flag scoring</div></div></div>
+        <div class="card-body">
+          <div class="code-box" style="color:var(--violet);font-size:11.5px;">
+Risk_Score = Σ(weight_i × flag_i)
+
+FLAGS + WEIGHTS:
+  w=25: New device + new location
+  w=20: Amount > 3× average txn
+  w=15: Time outside 6AM–10PM
+  w=15: Multiple rapid transfers
+  w=12: Foreign IP address
+  w=10: Account dormant 30+ days
+  w=8:  Failed PIN attempts today
+
+THRESHOLDS (Boolean Partition):
+  0–30:  LOW      → ALLOW ✓
+  31–60: MEDIUM   → REVIEW ⚠
+  61–80: HIGH     → FLAG 🚨
+  81–100:CRITICAL → BLOCK+ALERT 🔴</div>
+          <div style="margin-top:14px;" id="risk-live"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">🚨 Active Fraud Alerts</div></div><span class="badge b-err">2 Open</span></div>
+      <div class="card-body" id="fraud-alerts"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PROJECT BOARD — CSC 436 ═══ -->
+  <div class="page" id="page-project">
+    <div class="g4" style="margin-bottom:18px;" id="proj-stats"></div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head">
+        <div><div class="card-title">📌 Kanban Board — PulseBank Sprint 2</div><div class="card-sub">CSC 436: Agile/Scrum • 2-week sprints • Story points</div></div>
+        <span class="badge b-info">Sprint 2 Active</span>
+      </div>
+      <div class="card-body" style="padding:14px;">
+        <div class="kanban" id="kanban-board"></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div class="card-title">📈 Sprint Velocity</div></div>
+        <div class="card-body" id="velocity-chart"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">⚠️ Risk Register — CSC 436</div></div>
+        <div class="card-body" id="risk-register"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ NETWORK — CSC 417 ═══ -->
+  <div class="page" id="page-network">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">📡 OSI Network Stack — CSC 417</div><div class="card-sub">How PulseBank communicates across 7 layers</div></div></div>
+        <div class="card-body" id="osi-stack"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">🔗 REST API Endpoints</div></div>
+        <div class="card-body" id="api-endpoints"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">⚡ Real-Time Transaction Feed — WebSocket Simulation — CSC 417</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ok btn-sm" onclick="startFeed()">▶ Start Feed</button>
+          <button class="btn btn-g btn-sm" onclick="stopFeed()">■ Stop</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="net-log" style="background:#000;border:1px solid var(--border2);border-radius:10px;padding:14px;height:220px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--green);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ARCHITECTURE — CSC 419 ═══ -->
+  <div class="page" id="page-architecture">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🏗 Clean Architecture — PulseBank</div><div class="card-sub">CSC 419: Dependency Rule — always inward</div></div></div>
+        <div class="card-body" id="arch-layers"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">🔷 Design Patterns in PulseBank</div></div>
+        <div class="card-body" id="design-patterns"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">🎓 All 6 Courses — Integrated in PulseBank</div><div class="card-sub">How each course contributes to the FinTech platform</div></div></div>
+      <div class="card-body" id="courses-integration"></div>
+    </div>
+  </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- TRANSFER MODAL -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">↗ Quick Transfer</div>
+    <div class="modal-sub">Send money instantly — JWT secured · AES-256 encrypted</div>
+    <div class="fg"><label>Recipient Account</label><input id="m-to" placeholder="10-digit account number" oninput="mlookup()"><div id="m-lookup" style="font-size:12px;height:18px;margin-top:4px;"></div></div>
+    <div class="fg"><label>Amount (₦)</label><input type="number" id="m-amt" placeholder="₦0.00"></div>
+    <div class="fg"><label>Description</label><input id="m-narr" placeholder="Narration..."></div>
+    <div style="background:var(--s3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);">🔒 2FA required for transfers above ₦100,000</div>
+    <div class="modal-btns">
+      <button class="btn btn-g" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="doModalTransfer()">Send Money →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// PULSEBANK — Complete Application Logic
+// CSC 410: Database (localStorage simulation)
+// CSC 413: Discrete Math (loan formula, fraud scoring)
+// CSC 434: Security (XOR crypto, hash, input validation)
+// CSC 436: Project Management (Kanban, sprints)
+// CSC 417: Data Communication (OSI, REST API, WebSocket)
+// CSC 419: Software Architecture (Clean arch, patterns)
+// ══════════════════════════════════════════════════════════
+
+const DB = {
+  load: k => JSON.parse(localStorage.getItem('pb2_'+k)||'null'),
+  save: (k,v) => localStorage.setItem('pb2_'+k, JSON.stringify(v)),
+};
+
+function initData() {
+  if(DB.load('init')) return;
+  DB.save('accounts',[
+    {id:'ACC-001',name:'Current Account',balance:1850200,type:'current',number:'7823456100',color:'var(--brand)'},
+    {id:'ACC-002',name:'Savings Account',balance:847450,type:'savings',number:'7823456101',color:'var(--green)'},
+    {id:'ACC-003',name:'Investment',balance:150000,type:'investment',number:'7823456102',color:'var(--gold)'},
+  ]);
+  DB.save('txns',[
+    {id:1,desc:'Salary Credit — Andela Nigeria',date:'Jun 1',type:'Credit',amount:350000,status:'Success',icon:'💼',cat:'Income'},
+    {id:2,desc:'Shoprite — Ikeja City Mall',date:'Jun 3',type:'Debit',amount:12450,status:'Success',icon:'🛒',cat:'Shopping'},
+    {id:3,desc:'Transfer to Chidinma Eze',date:'Jun 4',type:'Transfer',amount:50000,status:'Success',icon:'↗',cat:'Transfer'},
+    {id:4,desc:'DSTV Subscription',date:'Jun 5',type:'Debit',amount:24500,status:'Success',icon:'📺',cat:'Utilities'},
+    {id:5,desc:'Freelance — Upwork',date:'Jun 6',type:'Credit',amount:125000,status:'Success',icon:'💻',cat:'Income'},
+    {id:6,desc:'Uber Rides — Week Total',date:'Jun 7',type:'Debit',amount:8900,status:'Success',icon:'🚗',cat:'Transport'},
+    {id:7,desc:'Transfer from Ibrahim Musa',date:'Jun 8',type:'Credit',amount:75000,status:'Success',icon:'↙',cat:'Transfer'},
+    {id:8,desc:'AWS Cloud Services',date:'Jun 9',type:'Debit',amount:18200,status:'Pending',icon:'☁️',cat:'Tech'},
+    {id:9,desc:'Transfer to Fatima Aliyu',date:'Jun 9',type:'Transfer',amount:30000,status:'Pending',icon:'↗',cat:'Transfer'},
+    {id:10,desc:'MTN Airtime Top-Up',date:'Jun 9',type:'Debit',amount:5000,status:'Success',icon:'📱',cat:'Utilities'},
+  ]);
+  DB.save('beneficiaries',[
+    {name:'Chidinma Eze',number:'4521789012',bank:'Access Bank',av:'CE'},
+    {name:'Ibrahim Musa',number:'8834561200',bank:'GTBank',av:'IM'},
+    {name:'Fatima Aliyu',number:'3312890045',bank:'Zenith Bank',av:'FA'},
+    {name:'Carol Smith',number:'9910023344',bank:'UBA',av:'CS'},
+  ]);
+  DB.save('init',true);
+}
+
+// ── Navigation ──────────────────────────────────────────
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el) el.classList.add('active');
+  const meta={
+    dashboard:['Dashboard','Welcome back, Adebayo • All 6 courses integrated in one platform'],
+    accounts:['My Accounts','CSC 410: Database-backed account management'],
+    transfer:['Transfer Money','CSC 434: AES-256 encrypted transfers • JWT authenticated'],
+    transactions:['Transaction History','CSC 410: Complete database of all financial activity'],
+    loans:['Loans & Credit','CSC 413: Discrete Math financial formula M = P[r(1+r)^n]/[(1+r)^n-1]'],
+    security:['Security Center','CSC 434: Cryptography, OWASP protections, security headers'],
+    fraud:['Fraud Detection','CSC 413: Graph theory + boolean risk scoring algorithms'],
+    project:['Project Board','CSC 436: Agile/Scrum sprint board — PulseBank development'],
+    network:['Network Status','CSC 417: OSI model, REST API, WebSocket live feed'],
+    architecture:['System Architecture','CSC 419: Clean Architecture, design patterns, SOLID'],
+  };
+  const [t,s]=meta[page]||['PulseBank',''];
+  document.getElementById('ptitle').textContent=t;
+  document.getElementById('psub').textContent=s;
+  const renders={dashboard:renderDashboard,accounts:renderAccounts,transfer:renderTransfer,transactions:()=>renderTxns(),loans:renderLoans,security:renderSecurity,fraud:renderFraud,project:renderProject,network:renderNetwork,architecture:renderArchitecture};
+  if(renders[page]) setTimeout(renders[page],40);
+}
+
+function showToast(msg,type='') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+const fmt=n=>'₦'+n.toLocaleString('en-NG',{minimumFractionDigits:2});
+
+// ── DASHBOARD ───────────────────────────────────────────
+function renderDashboard() {
+  const txns=DB.load('txns').slice(0,5);
+  document.getElementById('dash-txns').innerHTML=txns.map(t=>`
+    <div class="txn-row">
+      <div class="txn-icon-wrap" style="background:${t.type==='Credit'?'rgba(0,214,143,.1)':t.type==='Debit'?'rgba(255,69,96,.08)':'rgba(26,86,255,.1)'};">${t.icon}</div>
+      <div style="flex:1;"><div class="txn-name">${t.desc}</div><div class="txn-date">${t.date} · ${t.cat}</div></div>
+      <div>
+        <div class="txn-amount" style="color:${t.type==='Credit'?'var(--green)':'var(--text)'};">${t.type==='Credit'?'+':'-'}${fmt(t.amount)}</div>
+        <div class="txn-st"><span class="badge ${t.status==='Success'?'b-ok':'b-pend'}">${t.status}</span></div>
+      </div>
+    </div>`).join('');
+
+  const vals=[180,220,195,260,230,290],max=Math.max(...vals);
+  document.getElementById('spend-chart').innerHTML=vals.map((v,i)=>`
+    <div style="flex:1;background:${i===5?'var(--brand)':'rgba(26,86,255,.3)'};border-radius:5px 5px 0 0;height:${v/max*100}%;transition:height .5s ${i*.08}s;" title="₦${v}k"></div>`).join('');
+
+  document.getElementById('dash-fraud').innerHTML=`
+    <div class="f-alert">
+      <div style="font-size:20px;">⚠️</div>
+      <div>
+        <div class="f-title">Unusual Location — Abuja</div>
+        <div class="f-desc">Login attempt from IP 41.58.xxx.xxx (Abuja). Last login: Lagos. Risk score: 87/100.</div>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button class="btn btn-err btn-sm" onclick="showToast('Access blocked. Device flagged.','error')">Block</button>
+          <button class="btn btn-g btn-sm" onclick="showToast('Marked as safe.')">It was me</button>
+        </div>
+      </div>
+    </div>`;
+
+  const courses=[
+    {code:'CSC 410',name:'SmartLib → Database',desc:'Accounts, transactions, audit logs',col:'var(--brand)',icon:'🗄'},
+    {code:'CSC 413',name:'DiscreteMind → Math',desc:'Loan formula, fraud scoring',col:'var(--cyan)',icon:'🧠'},
+    {code:'CSC 434',name:'CipherShield → Security',desc:'AES, JWT, OWASP, headers',col:'var(--rose)',icon:'🔐'},
+    {code:'CSC 436',name:'ProTrack → Agile',desc:'Sprint board, velocity, risks',col:'var(--violet)',icon:'📌'},
+    {code:'CSC 417',name:'NetPulse → Network',desc:'OSI, REST API, WebSocket',col:'var(--green)',icon:'📡'},
+    {code:'CSC 419',name:'ArchForge → Design',desc:'Clean arch, patterns, SOLID',col:'var(--gold)',icon:'🏗'},
+  ];
+  document.getElementById('courses-banner').innerHTML=courses.map(c=>`
+    <div style="background:${c.col}0d;border:1px solid ${c.col}33;border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='${c.col}'" onmouseout="this.style.borderColor='${c.col}33'">
+      <div style="font-size:22px;margin-bottom:5px;">${c.icon}</div>
+      <div style="font-size:9px;font-weight:700;color:${c.col};letter-spacing:.5px;margin-bottom:3px;">${c.code}</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text);">${c.name.split('→')[1].trim()}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:3px;">${c.desc}</div>
+    </div>`).join('');
+}
+
+// ── ACCOUNTS ─────────────────────────────────────────────
+function renderAccounts() {
+  const accounts=DB.load('accounts');
+  document.getElementById('accounts-grid').innerHTML=accounts.map(a=>`
+    <div class="card" style="border-color:${a.color}33;cursor:pointer;margin-bottom:0;transition:transform .2s,border-color .2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='${a.color}'" onmouseout="this.style.transform='';this.style.borderColor='${a.color}33'">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text2);">${a.name}</div>
+          <div style="width:36px;height:36px;background:${a.color}18;border:1px solid ${a.color}44;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;">${a.type==='current'?'💳':a.type==='savings'?'🏦':'📈'}</div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:4px;">${a.number}</div>
+        <div style="font-size:28px;font-weight:900;letter-spacing:-1px;color:${a.color};margin-bottom:12px;">${fmt(a.balance)}</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-g btn-sm" style="flex:1;justify-content:center;" onclick="nav('transfer',null)">Send</button>
+          <button class="btn btn-g btn-sm" style="flex:1;justify-content:center;" onclick="showToast('Statement sent to email!')">Statement</button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const history=[1620000,1750000,1680000,1900000,1820000,1850200],maxH=Math.max(...history);
+  document.getElementById('bal-history').innerHTML=history.map((v,i)=>`
+    <div style="flex:1;background:${i===5?'var(--brand)':'rgba(26,86,255,.25)'};border-radius:6px 6px 0 0;height:${v/maxH*100}%;transition:height .5s ${i*.1}s;" title="${fmt(v)}"></div>`).join('');
+}
+
+// ── TRANSFER ──────────────────────────────────────────────
+const knownAccounts={'4521789012':'Chidinma Eze','8834561200':'Ibrahim Musa','3312890045':'Fatima Aliyu','9910023344':'Carol Smith'};
+function lookupAcc() {
+  const v=document.getElementById('t-to').value,el=document.getElementById('t-lookup');
+  if(v.length===10){el.textContent=knownAccounts[v]?'✓ '+knownAccounts[v]:'✗ Account not found';el.style.color=knownAccounts[v]?'var(--green)':'var(--rose)';}
+  else el.textContent='';
+}
+function mlookup() {
+  const v=document.getElementById('m-to').value,el=document.getElementById('m-lookup');
+  if(v.length===10){el.textContent=knownAccounts[v]?'✓ '+knownAccounts[v]:'✗ Not found';el.style.color=knownAccounts[v]?'var(--green)':'var(--rose)';}
+}
+function updateFee() {
+  const a=parseFloat(document.getElementById('t-amt').value)||0;
+  if(!a)return;
+  const fee=a<=5000?10.75:a<=50000?26.88:53.75;
+  document.getElementById('t-summary').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12.5px;">
+      <div style="color:var(--text2);">Transfer Amount:</div><div style="font-weight:700;">${fmt(a)}</div>
+      <div style="color:var(--text2);">Bank Charge (NIP):</div><div style="color:var(--amber);">₦${fee.toFixed(2)}</div>
+      <div style="color:var(--text2);">VAT (7.5%):</div><div style="color:var(--text2);">₦${(fee*.075).toFixed(2)}</div>
+      <div style="color:var(--text2);font-weight:700;border-top:1px solid var(--border);padding-top:6px;">Total Debit:</div>
+      <div style="font-weight:900;font-size:14px;border-top:1px solid var(--border);padding-top:6px;">${fmt(a+fee+fee*.075)}</div>
+    </div>`;
+}
+function doTransfer() {
+  const to=document.getElementById('t-to').value,a=parseFloat(document.getElementById('t-amt').value);
+  // CSC 434: Input validation
+  if(!to||to.length!==10){showToast('Enter a valid 10-digit account number','error');return;}
+  if(!a||a<100){showToast('Minimum transfer is ₦100','error');return;}
+  const txns=DB.load('txns');
+  txns.unshift({id:Date.now(),desc:document.getElementById('t-narr').value||'Transfer to '+to,date:'Today',type:'Transfer',amount:a,status:'Success',icon:'↗',cat:'Transfer'});
+  DB.save('txns',txns);
+  showToast(`✓ ${fmt(a)} sent successfully!`);
+  ['t-to','t-amt','t-narr'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('t-lookup').textContent='';
+  document.getElementById('t-summary').innerHTML='<div style="font-size:12px;color:var(--text2);">Enter amount to see fee breakdown</div>';
+}
+function renderTransfer() {
+  const bens=DB.load('beneficiaries');
+  document.getElementById('beneficiaries').innerHTML=bens.map(b=>`
+    <div class="txn-row" onclick="document.getElementById('t-to').value='${b.number}';lookupAcc();showToast('${b.name} selected')">
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0;">${b.av}</div>
+      <div style="flex:1;"><div class="txn-name">${b.name}</div><div class="txn-date">${b.number} · ${b.bank}</div></div>
+      <button class="btn btn-g btn-sm">Select</button>
+    </div>`).join('');
+  document.getElementById('security-checks').innerHTML=[
+    'AES-256 Encryption on all transfers',
+    'JWT token validation per request',
+    'Parameterized queries — no SQL injection',
+    'Rate limiting: max 20 transfers/hour',
+    'HMAC-SHA256 transaction signing',
+    'TLS 1.3 in transit encryption',
+  ].map(i=>`<div style="display:flex;gap:8px;padding:8px 10px;background:rgba(0,214,143,.04);border:1px solid rgba(0,214,143,.12);border-radius:8px;font-size:12px;"><span style="color:var(--green);">✓</span><span style="color:var(--text2);">${i}</span></div>`).join('');
+}
+
+// ── TRANSACTIONS ──────────────────────────────────────────
+function renderTxns(typeFilter='') {
+  let txns=DB.load('txns');
+  if(typeFilter) txns=txns.filter(t=>t.type===typeFilter);
+  document.getElementById('txn-table').innerHTML=txns.map((t,i)=>`
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:11px 20px;border-bottom:1px solid var(--border);align-items:center;${i%2?'background:rgba(255,255,255,.01)':''};transition:background .15s;" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background='${i%2?'rgba(255,255,255,.01)':''}'"  >
+      <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:18px;">${t.icon}</span><div><div style="font-size:12.5px;font-weight:600;">${t.desc}</div><div style="font-size:10.5px;color:var(--text2);">${t.cat}</div></div></div>
+      <div style="font-size:12px;color:var(--text2);">${t.date}</div>
+      <div><span class="badge ${t.type==='Credit'?'b-ok':t.type==='Debit'?'b-err':'b-info'}">${t.type}</span></div>
+      <div style="font-size:13px;font-weight:700;color:${t.type==='Credit'?'var(--green)':'var(--text)'};">${t.type==='Credit'?'+':'-'}${fmt(t.amount)}</div>
+      <div><span class="badge ${t.status==='Success'?'b-ok':'b-pend'}">${t.status}</span></div>
+    </div>`).join('');
+}
+function filterTxns(type){renderTxns(type);}
+
+// ── LOANS — CSC 413 ──────────────────────────────────────
+function calcLoan() {
+  const P=parseFloat(document.getElementById('l-amt').value)||0;
+  const annR=parseFloat(document.getElementById('l-rate').value)||12;
+  const n=parseInt(document.getElementById('l-tenure').value)||36;
+  if(!P)return;
+  // CSC 413: Geometric series formula for loan amortization
+  const r=annR/12/100;
+  const M=P*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);
+  const total=M*n, interest=total-P;
+  document.getElementById('loan-result').innerHTML=`
+    <div class="loan-result">
+      <div style="font-size:11px;color:var(--brand);font-weight:700;letter-spacing:1px;margin-bottom:8px;">LOAN BREAKDOWN</div>
+      <div style="font-size:36px;font-weight:900;letter-spacing:-1px;">${fmt(M)}<span style="font-size:14px;font-weight:400;color:var(--text2);">/month</span></div>
+      <div class="loan-grid">
+        <div class="loan-item"><div class="loan-lbl">Principal</div><div class="loan-val" style="color:var(--brand);">${fmt(P)}</div></div>
+        <div class="loan-item"><div class="loan-lbl">Total Interest</div><div class="loan-val" style="color:var(--rose);">${fmt(interest)}</div></div>
+        <div class="loan-item"><div class="loan-lbl">Total Payment</div><div class="loan-val">${fmt(total)}</div></div>
+        <div class="loan-item"><div class="loan-lbl">Annual Rate</div><div class="loan-val" style="color:var(--gold);">${annR}%</div></div>
+      </div>
+      <div style="margin-top:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px;"><span style="color:var(--text2);">Principal vs Interest ratio</span><span>${Math.round(P/total*100)}% vs ${Math.round(interest/total*100)}%</span></div>
+        <div class="prog"><div class="prog-fill" style="width:${P/total*100}%;background:var(--brand);"></div></div>
+      </div>
+    </div>`;
+}
+function renderLoans() {
+  calcLoan();
+  document.getElementById('active-loans').innerHTML=`
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div><div style="font-size:13px;font-weight:700;">LN001 — Personal Loan</div><div style="font-size:11px;color:var(--text2);">Disbursed: Jan 2025 · 12% p.a.</div></div>
+        <span class="badge b-ok">Active</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div style="background:var(--s3);border-radius:7px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--text2);">Principal</div><div style="font-size:15px;font-weight:800;color:var(--brand);">₦200,000</div></div>
+        <div style="background:var(--s3);border-radius:7px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--text2);">Monthly</div><div style="font-size:15px;font-weight:800;">₦9,426</div></div>
+        <div style="background:var(--s3);border-radius:7px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--text2);">Balance</div><div style="font-size:15px;font-weight:800;color:var(--amber);">₦168,450</div></div>
+      </div>
+      <div class="prog"><div class="prog-fill" style="width:${(1-168450/200000)*100}%;background:var(--green);"></div></div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;">${Math.round((1-168450/200000)*100)}% paid · ~18 months remaining</div>
+    </div>`;
+}
+
+// ── SECURITY — CSC 434 ───────────────────────────────────
+function runCrypto() {
+  const plain=document.getElementById('c-plain').value||'';
+  const key=document.getElementById('c-key').value||'KEY';
+  // XOR encryption demonstration
+  const enc=[...plain].map((c,i)=>(c.charCodeAt(0)^key.charCodeAt(i%key.length)).toString(16).padStart(2,'0')).join(' ');
+  document.getElementById('c-encrypted').textContent=enc;
+  // Simulated SHA-256 style hash
+  let h=0x6a09e667;
+  for(let i=0;i<plain.length;i++){h=Math.imul(h^plain.charCodeAt(i),0x9e3779b9);h^=h>>>16;}
+  document.getElementById('c-hash').textContent=Math.abs(h).toString(16).padStart(8,'0').repeat(8).substring(0,64);
+}
+function renderSecurity() {
+  runCrypto();
+  const owasp=[
+    ['A01','Broken Access Control','RBAC enforced on all endpoints'],
+    ['A02','Cryptographic Failures','AES-256-GCM, bcrypt, TLS 1.3'],
+    ['A03','Injection','Parameterized queries, DOMPurify, CSP'],
+    ['A04','Insecure Design','Threat modelling, rate limiting'],
+    ['A05','Security Misconfiguration','Hardened config, secrets in env vars'],
+    ['A07','Auth Failures','JWT RS256, MFA TOTP, lockout policy'],
+    ['A09','Logging Failures','Centralized audit log, SIEM alerts'],
+  ];
+  document.getElementById('owasp-list').innerHTML=owasp.map(([code,name,impl])=>`
+    <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);min-width:30px;">${code}</span>
+      <div style="flex:1;"><div style="font-size:12.5px;font-weight:700;">${name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px;">${impl}</div></div>
+      <span style="color:var(--green);font-size:14px;">✓</span>
+    </div>`).join('');
+
+  const headers=[
+    ['Content-Security-Policy',"default-src 'self'; script-src 'self' 'nonce-xyz'",'CRITICAL'],
+    ['Strict-Transport-Security','max-age=31536000; includeSubDomains; preload','HIGH'],
+    ['X-Frame-Options','DENY','HIGH'],
+    ['X-Content-Type-Options','nosniff','MEDIUM'],
+    ['Referrer-Policy','strict-origin-when-cross-origin','MEDIUM'],
+    ['Permissions-Policy','geolocation=(), camera=(), microphone=()','LOW'],
+  ];
+  document.getElementById('sec-headers').innerHTML=`<div style="display:flex;flex-direction:column;gap:6px;">`+
+    headers.map(([h,v,level])=>`
+      <div style="display:grid;grid-template-columns:280px 1fr 80px;gap:10px;align-items:center;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);">${h}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text2);">${v}</div>
+        <span class="badge ${level==='CRITICAL'?'b-err':level==='HIGH'?'b-high':level==='MEDIUM'?'b-med':'b-low'}">${level}</span>
+      </div>`).join('')+`</div>`;
+}
+
+// ── FRAUD DETECTION — CSC 413 ────────────────────────────
+function renderFraud() {
+  // Adjacency matrix (5 accounts) — CSC 413: Graph Theory
+  const matrix=[
+    [0,3,12,1,0],
+    [3,0,2,8,1],
+    [12,2,0,5,0],
+    [1,8,5,0,15],
+    [0,1,0,15,0],
+  ];
+  const accLabels=['A001','A002','A003','A004','A005'];
+  const cellColor=v=>v===0?'var(--s3)':v<=2?'rgba(0,214,143,.15)':v<=5?'rgba(255,170,0,.12)':v<=9?'rgba(255,100,0,.2)':'rgba(255,69,96,.25)';
+  const textColor=v=>v===0?'var(--text3)':v<=2?'var(--green)':v<=5?'var(--amber)':v<=9?'var(--orange)':'var(--rose)';
+  // Add header row and column labels
+  let html='<div style="display:grid;grid-template-columns:50px repeat(5,1fr);gap:3px;margin-bottom:2px;">';
+  html+='<div></div>';
+  accLabels.forEach(l=>html+=`<div style="text-align:center;font-size:10px;font-weight:700;color:var(--text2);font-family:'JetBrains Mono',monospace;padding:3px;">${l}</div>`);
+  html+='</div>';
+  matrix.forEach((row,i)=>{
+    html+=`<div style="display:grid;grid-template-columns:50px repeat(5,1fr);gap:3px;margin-bottom:3px;">`;
+    html+=`<div style="display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-weight:700;color:var(--text2);font-family:'JetBrains Mono',monospace;">${accLabels[i]}</div>`;
+    row.forEach(v=>html+=`<div style="aspect-ratio:1;border-radius:5px;background:${cellColor(v)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:${textColor(v)};cursor:pointer;transition:all .2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'" title="Weight: ${v}">${v}</div>`);
+    html+='</div>';
+  });
+  document.getElementById('fraud-matrix').outerHTML=`<div id="fraud-matrix">${html}</div>`;
+
+  // Live risk assessment
+  const flags=[
+    {name:'New device detected',w:25,active:true},
+    {name:'Transfer > 3× average',w:20,active:false},
+    {name:'Login outside 6AM–10PM',w:15,active:true},
+    {name:'Rapid successive transfers',w:15,active:false},
+    {name:'Foreign IP (41.58.xxx)',w:12,active:true},
+    {name:'Failed PIN attempt × 1',w:8,active:false},
+  ];
+  const score=flags.filter(f=>f.active).reduce((s,f)=>s+f.w,0);
+  const level=score<=30?['LOW RISK','var(--green)']:score<=60?['MEDIUM RISK','var(--amber)']:score<=80?['HIGH RISK','var(--rose)']:['CRITICAL','var(--rose)'];
+  document.getElementById('risk-live').innerHTML=`
+    <div style="background:${level[1]}0d;border:1px solid ${level[1]}33;border-radius:10px;padding:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;color:${level[1]};">Current Session: ${level[0]}</div>
+        <div style="font-size:22px;font-weight:900;color:${level[1]};font-family:'JetBrains Mono',monospace;">${score}/100</div>
+      </div>
+      <div class="prog" style="height:8px;margin-bottom:10px;"><div class="prog-fill" style="width:${score}%;background:${level[1]};"></div></div>
+      ${flags.map(f=>`<div style="display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0;"><span style="color:${f.active?level[1]:'var(--text3)'};">${f.active?'⚡':'○'} ${f.name}</span><span style="color:${f.active?level[1]:'var(--text3)'};font-family:'JetBrains Mono',monospace;font-size:10px;">+${f.w}</span></div>`).join('')}
+    </div>`;
+
+  document.getElementById('fraud-alerts').innerHTML=[
+    {title:'Unusual Location — Abuja',desc:'Login from Abuja (IP: 41.58.xxx.xxx). Last session: Lagos, Nigeria.',risk:87,level:'CRITICAL'},
+    {title:'Rapid Transfer Pattern',desc:'3 transfers to same account within 10 minutes. Total: ₦150,000.',risk:65,level:'HIGH'},
+  ].map(a=>`
+    <div class="f-alert" style="margin-bottom:10px;">
+      <div style="font-size:20px;">🚨</div>
+      <div style="flex:1;">
+        <div class="f-title">${a.title}</div>
+        <div class="f-desc">${a.desc}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+          <div style="flex:1;"><div class="prog"><div class="prog-fill" style="width:${a.risk}%;background:var(--rose);"></div></div></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--rose);font-weight:700;">${a.risk}/100</span>
+          <span class="badge b-err">${a.level}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button class="btn btn-err btn-sm" onclick="showToast('Transaction blocked. Security team notified.','error')">Block</button>
+          <button class="btn btn-g btn-sm" onclick="showToast('Marked as legitimate activity.')">Approve</button>
+          <button class="btn btn-g btn-sm" onclick="showToast('Escalated to fraud team.')">Escalate</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── PROJECT BOARD — CSC 436 ──────────────────────────────
+function renderProject() {
+  document.getElementById('proj-stats').innerHTML=[
+    {v:'Sprint 2',l:'Current Sprint',c:'var(--brand)'},
+    {v:'24',l:'Stories Done',c:'var(--green)'},
+    {v:'8',l:'In Progress',c:'var(--amber)'},
+    {v:'78%',l:'Sprint Velocity',c:'var(--cyan)'},
+  ].map(s=>`
+    <div class="stat-card">
+      <div class="stat-val" style="color:${s.c};">${s.v}</div>
+      <div class="stat-lbl">${s.l}</div>
+    </div>`).join('');
+
+  const stories=[
+    {id:'US-01',title:'JWT auth with RS256 signing',epic:'Security',pts:8,priority:'High',status:'Done',av:'AO'},
+    {id:'US-02',title:'AES-256 transaction encryption',epic:'Security',pts:5,priority:'High',status:'Done',av:'AO'},
+    {id:'US-03',title:'Loan calculator with discrete math formula',epic:'Finance',pts:5,priority:'High',status:'Done',av:'CE'},
+    {id:'US-04',title:'Fraud detection graph adjacency matrix',epic:'ML',pts:8,priority:'High',status:'In Progress',av:'IM'},
+    {id:'US-05',title:'Kanban board with sprint management',epic:'PM',pts:5,priority:'Med',status:'In Progress',av:'FA'},
+    {id:'US-06',title:'WebSocket real-time notification feed',epic:'Network',pts:8,priority:'High',status:'In Progress',av:'AO'},
+    {id:'US-07',title:'Transfer beneficiary management',epic:'Banking',pts:3,priority:'Med',status:'Review',av:'CE'},
+    {id:'US-08',title:'PDF statement generation',epic:'Banking',pts:5,priority:'Low',status:'To Do',av:'IM'},
+    {id:'US-09',title:'Clean Architecture refactor',epic:'Arch',pts:8,priority:'High',status:'To Do',av:'FA'},
+    {id:'US-10',title:'OWASP Top 10 security audit',epic:'Security',pts:5,priority:'High',status:'To Do',av:'AO'},
+  ];
+  const cols=[
+    {key:'To Do',color:'var(--text2)'},{key:'In Progress',color:'var(--brand)'},
+    {key:'Review',color:'var(--amber)'},{key:'Done',color:'var(--green)'},
+  ];
+  const avColor={'AO':'var(--brand)','CE':'var(--cyan)','IM':'var(--green)','FA':'var(--gold)'};
+  document.getElementById('kanban-board').innerHTML=cols.map(col=>{
+    const cards=stories.filter(s=>s.status===col.key);
+    return `<div class="kb-col">
+      <div class="kb-head"><div class="kb-title" style="color:${col.color};">${col.key.toUpperCase()}</div><div class="kb-count">${cards.length}</div></div>
+      <div class="kb-cards">
+        ${cards.map(c=>`
+          <div class="kb-card" onclick="showToast('${c.id}: ${c.title.substring(0,40)}...')">
+            <div style="font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.8px;margin-bottom:4px;">${c.epic.toUpperCase()}</div>
+            <div class="kb-title-card">${c.title}</div>
+            <div class="kb-meta">
+              <div style="width:22px;height:22px;border-radius:50%;background:${avColor[c.av]};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;">${c.av}</div>
+              <span class="badge ${c.priority==='High'?'b-high':c.priority==='Med'?'b-med':'b-low'}">${c.priority}</span>
+              <span class="kb-pts">${c.pts}pt</span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Velocity
+  const vel=[{s:'Sprint 1',p:28,a:28},{s:'Sprint 2',p:35,a:21},{s:'Sprint 3',p:32,a:null}];
+  const maxV=35;
+  document.getElementById('velocity-chart').innerHTML=vel.map(v=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="width:70px;font-size:11px;color:var(--text2);">${v.s}</div>
+      <div style="flex:1;height:24px;background:var(--s3);border-radius:5px;overflow:hidden;position:relative;">
+        <div style="height:100%;background:rgba(26,86,255,.3);width:${v.p/maxV*100}%;position:absolute;border-radius:5px;"></div>
+        ${v.a!==null?`<div style="height:100%;background:var(--brand);width:${v.a/maxV*100}%;position:absolute;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;"><span style="font-size:10.5px;font-weight:700;color:#fff;">${v.a}</span></div>`:''}
+      </div>
+      <div style="font-size:11px;color:var(--text2);width:35px;font-family:'JetBrains Mono',monospace;">${v.a!==null?v.a+'/'+v.p:'—'}</div>
+    </div>`).join('');
+
+  document.getElementById('risk-register').innerHTML=[
+    {desc:'Scope creep — feature requests mid-sprint',prob:'High',impact:'High',exp:'Critical',status:'Active'},
+    {desc:'Key dev unavailable (illness)',prob:'Med',impact:'High',exp:'High',status:'Mitigated'},
+    {desc:'Third-party payment API downtime',prob:'Low',impact:'High',exp:'Med',status:'Monitored'},
+    {desc:'Security audit finding late',prob:'Med',impact:'Med',exp:'Med',status:'Active'},
+  ].map(r=>`
+    <div style="display:flex;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+      <div style="width:8px;height:8px;border-radius:2px;background:${r.exp==='Critical'?'var(--rose)':r.exp==='High'?'var(--amber)':'var(--cyan)'};margin-top:4px;flex-shrink:0;"></div>
+      <div style="flex:1;font-size:12px;">${r.desc}</div>
+      <span class="badge ${r.exp==='Critical'?'b-err':r.exp==='High'?'b-high':'b-med'}">${r.exp}</span>
+    </div>`).join('');
+}
+
+// ── NETWORK — CSC 417 ────────────────────────────────────
+let feedInterval=null;
+function renderNetwork() {
+  const layers=[
+    {n:7,name:'Application',proto:'REST API (HTTPS/JSON)',col:'var(--violet)',status:'Online'},
+    {n:6,name:'Presentation',proto:'TLS 1.3 encryption',col:'#9333ea',status:'Online'},
+    {n:5,name:'Session',proto:'JWT session tokens',col:'var(--brand)',status:'Online'},
+    {n:4,name:'Transport',proto:'TCP port 443',col:'var(--cyan)',status:'Online'},
+    {n:3,name:'Network',proto:'IPv4 routing',col:'var(--green)',status:'Online'},
+    {n:2,name:'Data Link',proto:'Ethernet frames',col:'var(--amber)',status:'Online'},
+    {n:1,name:'Physical',proto:'Fiber optic cable',col:'var(--text2)',status:'Online'},
+  ];
+  document.getElementById('osi-stack').innerHTML=layers.map(l=>`
+    <div style="background:${l.col}0d;border:1px solid ${l.col}33;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform=''">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:${l.col};min-width:20px;">${l.n}</div>
+      <div style="font-size:12px;font-weight:700;color:${l.col};min-width:110px;">${l.name}</div>
+      <div style="font-size:11.5px;color:var(--text2);flex:1;">${l.proto}</div>
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;"></div>
+    </div>`).join('');
+
+  document.getElementById('api-endpoints').innerHTML=[
+    {method:'POST',path:'/api/v1/auth/login',desc:'JWT authentication',latency:'42ms',status:200},
+    {method:'GET', path:'/api/v1/accounts',desc:'List user accounts',latency:'18ms',status:200},
+    {method:'POST',path:'/api/v1/transfers',desc:'Execute transfer',latency:'156ms',status:201},
+    {method:'GET', path:'/api/v1/transactions',desc:'Transaction history',latency:'35ms',status:200},
+    {method:'POST',path:'/api/v1/loans/apply',desc:'Loan application',latency:'88ms',status:201},
+    {method:'GET', path:'/api/v1/fraud/alerts',desc:'Fraud detection alerts',latency:'24ms',status:200},
+  ].map(e=>{
+    const mc={'POST':'var(--green)','GET':'var(--brand)','PUT':'var(--amber)','DELETE':'var(--rose)'};
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="background:${mc[e.method]}18;color:${mc[e.method]};border:1px solid ${mc[e.method]}33;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;min-width:44px;text-align:center;">${e.method}</span>
+      <div style="flex:1;"><div style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--text);">${e.path}</div><div style="font-size:10.5px;color:var(--text2);">${e.desc}</div></div>
+      <div style="text-align:right;"><div style="font-size:11px;color:var(--green);font-family:'JetBrains Mono',monospace;">${e.status}</div><div style="font-size:10px;color:var(--text3);">${e.latency}</div></div>
+    </div>`;
+  }).join('');
+}
+
+const logMessages=[
+  '[WS] Client connected: 192.168.1.10:54231 → api.pulsebank.ng:443',
+  '[TXN] Transfer initiated: ACC-001 → ACC-4521 | Amount: ₦50,000',
+  '[AUTH] JWT validated: user=adebayo@pulsebank.ng | exp=7200s',
+  '[FRAUD] Risk score computed: 32/100 → REVIEW flag raised',
+  '[DB] Query executed: SELECT * FROM transactions WHERE account_id=? (2ms)',
+  '[SEC] CSP header applied: default-src self',
+  '[NET] TCP connection: SYN→SYN-ACK→ACK (3ms RTT)',
+  '[TXN] Transfer SUCCESS: ref=TXN-20250609-001 | HMAC verified ✓',
+  '[AUDIT] Event logged: TRANSFER by user:7823 | IP:105.112.xxx',
+  '[WS] Notification pushed: "Transfer of ₦50,000 successful"',
+  '[CACHE] Cache hit: user_profile:adebayo (0.1ms)',
+  '[DB] INSERT INTO audit_log: action=TRANSFER | 3ms',
+];
+let logIdx=0;
+function startFeed() {
+  stopFeed();
+  const el=document.getElementById('net-log');
+  el.innerHTML='';
+  feedInterval=setInterval(()=>{
+    const msg=logMessages[logIdx%logMessages.length];
+    const now=new Date().toLocaleTimeString('en-NG',{hour12:false});
+    const col=msg.includes('ERROR')||msg.includes('FAIL')?'#ff4560':msg.includes('FRAUD')?'#ffaa00':'#00d68f';
+    el.innerHTML+=`<div style="color:${col};margin-bottom:3px;"><span style="color:var(--text2);">[${now}]</span> ${msg}</div>`;
+    el.scrollTop=el.scrollHeight;
+    logIdx++;
+  },900);
+}
+function stopFeed() { clearInterval(feedInterval); }
+
+// ── ARCHITECTURE — CSC 419 ───────────────────────────────
+function renderArchitecture() {
+  const archLayers=[
+    {n:'4',name:'Frameworks & Drivers',desc:'Express.js, React, MySQL Connector, JWT library',col:'var(--text3)',role:'Most volatile — nothing depends here'},
+    {n:'3',name:'Interface Adapters',desc:'AccountController, TransferController, FraudAdapter',col:'var(--brand)',role:'Converts data between use cases and external formats'},
+    {n:'2',name:'Application Use Cases',desc:'TransferFundsUseCase, DetectFraudUseCase, ApplyLoanUseCase',col:'var(--cyan)',role:'PulseBank business rules orchestration'},
+    {n:'1',name:'Domain / Entities',desc:'BankAccount, Money, Transaction, LoanApplication',col:'var(--gold)',role:'Zero external dependencies — pure business logic'},
+  ];
+  document.getElementById('arch-layers').innerHTML=archLayers.map(l=>`
+    <div style="background:${l.col}0d;border:1px solid ${l.col}33;border-radius:9px;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;" onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter=''">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:${l.col};min-width:24px;">${l.n}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:${l.col};">${l.name}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${l.desc}</div>
+      </div>
+      ${l.n==='1'?'<span class="badge b-ok">INNERMOST</span>':''}
+    </div>`).join('');
+
+  document.getElementById('design-patterns').innerHTML=[
+    {pattern:'Repository',lang:'Python',desc:'AccountRepository port — swap InMemory/MySQL/PostgreSQL'},
+    {pattern:'Factory Method',lang:'Python',desc:'NotificationFactory.create("email"|"sms"|"push")'},
+    {pattern:'Observer',lang:'Python+Java',desc:'EventBus — FraudDetected → freeze account'},
+    {pattern:'Strategy',lang:'TypeScript',desc:'FraudScorer — swappable scoring algorithms'},
+    {pattern:'Singleton',lang:'Java',desc:'ServiceRegistry — one instance across all services'},
+    {pattern:'Circuit Breaker',lang:'Java',desc:'PaymentGateway resilience — CLOSED→OPEN→HALF_OPEN'},
+    {pattern:'Command',lang:'C#',desc:'TransferCommand with Undo/Redo capability'},
+    {pattern:'Decorator',lang:'Python',desc:'LoggingDecorator + CachingDecorator on data services'},
+  ].map((p,i)=>`
+    <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:center;">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--brand);flex-shrink:0;"></div>
+      <div style="flex:1;"><div style="font-size:12.5px;font-weight:700;color:var(--brand);">${p.pattern}</div><div style="font-size:11px;color:var(--text2);margin-top:2px;">${p.desc}</div></div>
+      <span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;">${p.lang}</span>
+    </div>`).join('');
+
+  const courses=[
+    {code:'CSC 410',col:'var(--brand)',icon:'🗄',name:'Database Design',contrib:'Accounts, transactions, loans, audit_log tables. ER diagram, normalization 3NF, stored procedures.'},
+    {code:'CSC 413',col:'var(--cyan)',icon:'🧠',name:'Discrete Mathematics',contrib:'Loan formula M=P[r(1+r)^n]/[(1+r)^n-1]. Graph adjacency matrix for fraud detection. Boolean risk scoring.'},
+    {code:'CSC 434',col:'var(--rose)',icon:'🔐',name:'Web Design & Security',contrib:'XOR/AES-256 encryption, SHA-256 hashing, JWT tokens, OWASP protections, security headers, CSP.'},
+    {code:'CSC 436',col:'var(--violet)',icon:'📌',name:'Software Project Mgmt',contrib:'Kanban sprint board, velocity tracking, risk register, COCOMO estimation, SDLC lifecycle.'},
+    {code:'CSC 417',col:'var(--green)',icon:'📡',name:'Data Communication',contrib:'OSI 7-layer display, REST API simulation, TCP/IP, WebSocket live feed, network packet logging.'},
+    {code:'CSC 419',col:'var(--gold)',icon:'🏗',name:'Software Architecture',contrib:'Clean Architecture (4 layers), SOLID principles, 8 GoF patterns, microservices, CQRS pattern.'},
+  ];
+  document.getElementById('courses-integration').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">`+
+    courses.map(c=>`
+      <div style="background:${c.col}0a;border:1px solid ${c.col}33;border-radius:10px;padding:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-size:22px;">${c.icon}</span>
+          <div><div style="font-size:11px;font-weight:700;color:${c.col};letter-spacing:.5px;">${c.code}</div><div style="font-size:12.5px;font-weight:700;color:var(--text);">${c.name}</div></div>
+        </div>
+        <div style="font-size:11.5px;color:var(--text2);line-height:1.6;">${c.contrib}</div>
+      </div>`).join('')+`</div>`;
+}
+
+// ── MODAL ────────────────────────────────────────────────
+function openModal(){document.getElementById('modal').classList.add('open');}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function doModalTransfer() {
+  const to=document.getElementById('m-to').value,a=parseFloat(document.getElementById('m-amt').value);
+  if(!to||to.length!==10){showToast('Enter valid account number','error');return;}
+  if(!a||a<100){showToast('Minimum transfer ₦100','error');return;}
+  showToast(`✓ ${fmt(a)} sent to ${knownAccounts[to]||to}!`);
+  closeModal();
+}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+
+// ── INIT ─────────────────────────────────────────────────
+initData();
+renderDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArchForge — Software Design & Architecture Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05080f;--s1:#080d18;--s2:#0c1322;--s3:#10192e;--s4:#162038;
+  --border:#1d2f4a;--border2:#263d60;
+  --gold:#f5a623;--gold2:#e8921a;--gold3:#8a5210;
+  --violet:#7c3aed;--vlt:#a78bfa;
+  --teal:#0d9488;--cyan:#22d3ee;
+  --green:#10b981;--rose:#f43f5e;
+  --blue:#3b82f6;--orange:#f97316;
+  --text:#e8f0ff;--text2:#6b85a8;--text3:#2d4060;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:252px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;}
+.sidebar::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,var(--gold),var(--violet),transparent 70%);}
+.logo-zone{padding:20px 16px 18px;border-bottom:1px solid var(--border);}
+.logo-pill{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(245,166,35,.1),rgba(124,58,237,.06));border:1px solid rgba(245,166,35,.25);border-radius:10px;padding:10px 13px;margin-bottom:7px;}
+.logo-sq{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 16px rgba(245,166,35,.3);}
+.logo-name{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.logo-sub{font-size:9px;color:var(--text3);letter-spacing:1.8px;text-transform:uppercase;margin-top:1px;}
+.nav{padding:10px 10px;flex:1;overflow-y:auto;}
+.nav-g{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:10px 10px 4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:7px;cursor:pointer;transition:all .18s;font-size:12.5px;color:var(--text2);border:1px solid transparent;margin-bottom:1px;font-weight:500;}
+.nav-item:hover{background:var(--s2);color:var(--text);border-color:var(--border);}
+.nav-item.active{background:rgba(245,166,35,.08);color:var(--gold);border-color:rgba(245,166,35,.25);}
+.nav-icon{font-size:13px;width:18px;text-align:center;}
+.lang-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;font-family:'Fira Code',monospace;}
+.sidebar-foot{padding:12px 14px;border-top:1px solid var(--border);}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px;}
+.lang-chip{background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:4px 7px;font-size:10px;font-weight:600;text-align:center;font-family:'Fira Code',monospace;}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;height:100vh;}
+.topbar{position:sticky;top:0;z-index:10;padding:13px 26px;background:rgba(5,8,15,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.page-head .title{font-size:20px;font-weight:800;letter-spacing:-.3px;}
+.page-head .sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.gold-chip{display:flex;align-items:center;gap:6px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:20px;padding:5px 12px;font-size:10.5px;color:var(--gold);font-weight:600;font-family:'Fira Code',monospace;}
+.chip-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;box-shadow:0 0 6px var(--gold);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.content{padding:20px 26px;}
+.page{display:none;}.page.active{display:block;}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:18px;}
+.card-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13.5px;font-weight:700;}
+.card-sub{font-size:10.5px;color:var(--text2);margin-top:2px;}
+.card-body{padding:18px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+
+/* ── KPI ── */
+.kpi{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;transition:all .2s;}
+.kpi:hover{border-color:var(--border2);}
+.kpi-val{font-size:28px;font-weight:800;letter-spacing:-.5px;font-family:'Fira Code',monospace;}
+.kpi-lbl{font-size:11px;color:var(--text2);margin-top:5px;}
+
+/* ── PATTERN CARDS ── */
+.pattern-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.pattern-card{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px;cursor:pointer;transition:all .2s;}
+.pattern-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.pattern-card::before{content:'';display:block;height:2px;margin-bottom:10px;border-radius:2px;background:var(--pc,var(--gold));}
+.pat-name{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.pat-cat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.pat-desc{font-size:11px;color:var(--text2);line-height:1.5;}
+
+/* ── ARCHITECTURE LAYERS ── */
+.arch-layer{border-radius:8px;padding:12px 16px;margin-bottom:5px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;position:relative;}
+.arch-layer:hover{filter:brightness(1.1);}
+.layer-num{font-family:'Fira Code',monospace;font-size:18px;font-weight:700;min-width:28px;}
+.layer-name{font-size:13px;font-weight:700;min-width:130px;}
+.layer-content{font-size:11px;flex:1;}
+.layer-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;font-family:'Fira Code',monospace;}
+
+/* ── CODE BLOCK ── */
+.code-wrap{border-radius:9px;overflow:hidden;}
+.code-header{background:var(--s3);padding:8px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text2);letter-spacing:1px;display:flex;align-items:center;justify-content:space-between;font-family:'Fira Code',monospace;}
+.code-body{background:#030509;padding:16px;font-family:'Fira Code',monospace;font-size:11px;line-height:1.85;overflow-x:auto;color:var(--text2);}
+.kw{color:#c084fc;}.fn{color:#34d399;}.cls{color:#60a5fa;}.str{color:var(--gold);}.cmt{color:var(--text3);}.num{color:#f87171;}.dec{color:var(--cyan);}
+
+/* ── SOLID CARDS ── */
+.solid-card{border-radius:10px;padding:16px;border:1px solid;margin-bottom:12px;position:relative;overflow:hidden;}
+.solid-letter{font-family:'Sora',sans-serif;font-size:52px;font-weight:800;opacity:.08;position:absolute;right:10px;top:-5px;line-height:1;}
+.solid-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.solid-name{font-size:14px;font-weight:700;margin-bottom:6px;}
+.solid-desc{font-size:11.5px;line-height:1.6;}
+
+/* ── UML DIAGRAM ── */
+.uml-box{background:var(--s3);border:2px solid;border-radius:8px;overflow:hidden;display:inline-block;min-width:180px;}
+.uml-head{padding:8px 12px;font-size:12px;font-weight:700;font-family:'Fira Code',monospace;text-align:center;}
+.uml-divider{height:1px;background:var(--border2);}
+.uml-body{padding:8px 12px;font-size:11px;font-family:'Fira Code',monospace;color:var(--text2);line-height:1.9;}
+.uml-sep{height:1px;background:var(--border);margin:4px 0;}
+
+/* ── BTN ── */
+.btn{padding:8px 16px;border-radius:7px;border:none;font-family:'Sora',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;}
+.btn-gold{background:var(--gold);color:#000;box-shadow:0 4px 14px rgba(245,166,35,.25);}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,166,35,.35);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--s2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:11.5px;}
+
+/* ── MISC ── */
+input,select{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:7px;font-family:'Sora',sans-serif;font-size:13px;padding:9px 12px;transition:all .18s;width:100%;}
+input:focus,select:focus{outline:none;border-color:var(--gold3);box-shadow:0 0 0 3px rgba(245,166,35,.07);}
+label{font-size:10.5px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.fg{margin-bottom:13px;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.sec-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin:0 0 10px;}
+.prog{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'Fira Code',monospace;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:9px;padding:12px 18px;font-size:12px;z-index:999;transform:translateX(200%);transition:transform .3s;max-width:300px;}
+.toast.show{transform:translateX(0);}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="logo-zone">
+    <div class="logo-pill">
+      <div class="logo-sq">🏗</div>
+      <div><div class="logo-name">ArchForge</div><div class="logo-sub">CSC 419 — Architecture</div></div>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="nav-g">Overview</div>
+    <div class="nav-item active" onclick="nav('home',this)"><span class="nav-icon">⬡</span> Dashboard</div>
+    <div class="nav-g">Core Concepts</div>
+    <div class="nav-item" onclick="nav('solid',this)"><span class="nav-icon">💎</span> SOLID Principles</div>
+    <div class="nav-item" onclick="nav('patterns',this)"><span class="nav-icon">🔷</span> Design Patterns</div>
+    <div class="nav-item" onclick="nav('clean',this)"><span class="nav-icon">🏛</span> Clean Architecture</div>
+    <div class="nav-item" onclick="nav('uml',this)"><span class="nav-icon">📐</span> UML Diagrams</div>
+    <div class="nav-g">Implementations</div>
+    <div class="nav-item" onclick="nav('python',this)"><span class="nav-icon">🐍</span> Python — GoF Patterns <span class="lang-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;">PY</span></div>
+    <div class="nav-item" onclick="nav('java',this)"><span class="nav-icon">☕</span> Java — Microservices <span class="lang-badge" style="background:rgba(245,158,11,.12);color:var(--gold);">JAVA</span></div>
+    <div class="nav-item" onclick="nav('typescript',this)"><span class="nav-icon">🔷</span> TypeScript — MVC <span class="lang-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;">TS</span></div>
+    <div class="nav-item" onclick="nav('cpp',this)"><span class="nav-icon">⚡</span> C++ — SOLID Demo <span class="lang-badge" style="background:rgba(139,92,246,.15);color:#a78bfa;">C++</span></div>
+    <div class="nav-item" onclick="nav('csharp',this)"><span class="nav-icon">🟣</span> C# — Event-Driven <span class="lang-badge" style="background:rgba(124,58,237,.15);color:var(--vlt);">C#</span></div>
+    <div class="nav-item" onclick="nav('database',this)"><span class="nav-icon">🗄</span> SQL — Arch Registry <span class="lang-badge" style="background:rgba(16,185,129,.1);color:var(--green);">SQL</span></div>
+    <div class="nav-g">Reference</div>
+    <div class="nav-item" onclick="nav('compare',this)"><span class="nav-icon">⚖</span> Architecture Styles</div>
+    <div class="nav-item" onclick="nav('quiz',this)"><span class="nav-icon">🎯</span> Architecture Quiz</div>
+  </div>
+  <div class="sidebar-foot">
+    <div class="sec-lbl">Languages Used</div>
+    <div class="lang-grid">
+      <div class="lang-chip" style="color:#60a5fa;">Python</div>
+      <div class="lang-chip" style="color:var(--gold);">Java</div>
+      <div class="lang-chip" style="color:#60a5fa;">TypeScript</div>
+      <div class="lang-chip" style="color:#a78bfa;">C++</div>
+      <div class="lang-chip" style="color:var(--vlt);">C#</div>
+      <div class="lang-chip" style="color:var(--green);">SQL</div>
+      <div class="lang-chip" style="color:var(--orange);">HTML/JS</div>
+      <div class="lang-chip" style="color:var(--cyan);">7 Total</div>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="topbar">
+    <div class="page-head">
+      <div class="title" id="page-title">Architecture Dashboard</div>
+      <div class="sub" id="page-sub">CSC 419: Software Design & Architecture — 7-Language Grand Finale</div>
+    </div>
+    <div class="gold-chip"><div class="chip-dot"></div>GRAND FINALE — 7 Languages</div>
+  </div>
+  <div class="content">
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="g4" style="margin-bottom:18px;">
+      <div class="kpi"><div class="kpi-val" style="color:var(--gold)">7</div><div class="kpi-lbl">Programming Languages</div></div>
+      <div class="kpi"><div class="kpi-val" style="color:var(--violet)">23</div><div class="kpi-lbl">GoF Design Patterns</div></div>
+      <div class="kpi"><div class="kpi-val" style="color:var(--green)">5</div><div class="kpi-lbl">SOLID Principles</div></div>
+      <div class="kpi"><div class="kpi-val" style="color:var(--cyan)">8</div><div class="kpi-lbl">Architecture Styles</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">📁 Project Structure — 7 Languages</div></div></div>
+        <div class="card-body">
+          <div class="code-body" style="background:var(--bg);border-radius:8px;border:1px solid var(--border);font-size:11.5px;line-height:2.1;">
+<span style="color:var(--gold)">archforge/</span>
+├── <span style="color:#60a5fa">python/</span>
+│   ├── design_patterns.py    <span class="cmt"># All 23 GoF patterns</span>
+│   └── clean_architecture.py <span class="cmt"># Clean arch + DDD</span>
+├── <span style="color:var(--gold)">java/</span>
+│   └── ArchForgeApplication.java <span class="cmt"># Microservices</span>
+├── <span style="color:#60a5fa">typescript/</span>
+│   └── mvc_architecture.ts   <span class="cmt"># MVC + Generics</span>
+├── <span style="color:#a78bfa">cpp/</span>
+│   └── solid_principles.cpp  <span class="cmt"># SOLID + Templates</span>
+├── <span style="color:var(--vlt)">csharp/</span>
+│   └── event_driven.cs       <span class="cmt"># CQRS + Events</span>
+├── <span style="color:var(--green)">sql/</span>
+│   └── archforge_db.sql      <span class="cmt"># Arch registry DB</span>
+├── <span style="color:var(--orange)">html/</span>
+│   └── index.html            <span class="cmt"># This dashboard</span>
+└── README.md</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📚 CSC 419 Topics Covered</div></div>
+        <div class="card-body">
+          <div class="g2">
+            <div>
+              <div class="sec-lbl">Design Principles</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2.1;">SOLID (all 5)<br>DRY, KISS, YAGNI<br>Law of Demeter<br>Separation of Concerns<br>High Cohesion / Low Coupling</div>
+            </div>
+            <div>
+              <div class="sec-lbl">Architecture Patterns</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2.1;">Clean Architecture<br>Microservices<br>MVC / MVP / MVVM<br>Event-Driven (EDA)<br>CQRS + Domain Events</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">🔷 Design Pattern Categories (GoF)</div></div>
+      <div class="card-body">
+        <div class="g3" id="home-patterns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLID PAGE -->
+  <div class="page" id="page-solid">
+    <div id="solid-cards"></div>
+  </div>
+
+  <!-- DESIGN PATTERNS PAGE -->
+  <div class="page" id="page-patterns">
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;" id="pattern-filter"></div>
+    <div class="pattern-grid" id="pattern-grid"></div>
+  </div>
+
+  <!-- CLEAN ARCHITECTURE PAGE -->
+  <div class="page" id="page-clean">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🏛 Clean Architecture Layers</div><div class="card-sub">Robert C. Martin — Dependency Rule: always inward</div></div></div>
+        <div class="card-body" id="clean-layers"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">🐍 Python Implementation</div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="code-wrap">
+            <div class="code-header">clean_architecture.py <span class="lang-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;">Python</span></div>
+            <div class="code-body">
+<span class="cmt"># Layer 1: Domain — Pure business rules</span>
+<span class="dec">@dataclass</span>
+<span class="kw">class</span> <span class="cls">BankAccount</span>:
+  balance: <span class="cls">Money</span>
+  status: <span class="cls">AccountStatus</span>
+
+  <span class="kw">def</span> <span class="fn">deposit</span>(self, amount: <span class="cls">Money</span>):
+    self._ensure_active()  <span class="cmt"># Business rule</span>
+    self.balance = self.balance.<span class="fn">add</span>(amount)
+
+<span class="cmt"># Layer 2: Application — Use cases</span>
+<span class="kw">class</span> <span class="cls">TransferFundsUseCase</span>:
+  <span class="kw">def</span> <span class="fn">__init__</span>(self,
+    repo: <span class="cls">AccountRepository</span>,   <span class="cmt"># Port!</span>
+    notify: <span class="cls">NotificationPort</span>): ...
+
+  <span class="kw">def</span> <span class="fn">execute</span>(self, req: <span class="cls">TransferRequest</span>):
+    acc = self._repo.<span class="fn">find_by_id</span>(req.from_id)
+    txn = acc.<span class="fn">withdraw</span>(req.amount)  <span class="cmt"># Domain</span>
+    self._repo.<span class="fn">save</span>(acc)             <span class="cmt"># Persist</span>
+    self._notify.<span class="fn">send_alert</span>(txn)     <span class="cmt"># Notify</span>
+
+<span class="cmt"># Layer 3: Adapters — Implementations</span>
+<span class="kw">class</span> <span class="cls">InMemoryAccountRepository</span>(
+    <span class="cls">AccountRepository</span>):  <span class="cmt"># Implements Port</span>
+  <span class="kw">def</span> <span class="fn">save</span>(self, acc): self._store[acc.id]=acc
+
+<span class="cmt"># Layer 4: Composition Root</span>
+app = <span class="cls">Application</span>()  <span class="cmt"># Wires all layers</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UML PAGE -->
+  <div class="page" id="page-uml">
+    <div class="card">
+      <div class="card-head"><div class="card-title">📐 UML Class Diagrams</div></div>
+      <div class="card-body">
+        <div class="g2">
+          <div>
+            <div class="sec-lbl">Observer Pattern — UML</div>
+            <div style="display:flex;flex-direction:column;gap:8px;" id="uml-observer"></div>
+          </div>
+          <div>
+            <div class="sec-lbl">Strategy Pattern — UML</div>
+            <div style="display:flex;flex-direction:column;gap:8px;" id="uml-strategy"></div>
+          </div>
+        </div>
+        <div style="margin-top:18px;">
+          <div class="sec-lbl">Sequence Diagram — TCP Three-Way Handshake (Linked with CSC 417)</div>
+          <div id="sequence-diagram"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PYTHON PAGE -->
+  <div class="page" id="page-python">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🐍 Python — 23 GoF Patterns</div></div></div>
+        <div class="card-body" id="py-patterns"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">🏛 Python — Clean Architecture</div></div>
+        <div class="card-body" id="py-clean"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVA PAGE -->
+  <div class="page" id="page-java">
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">☕ Java — Microservices Architecture</div></div></div>
+      <div class="card-body">
+        <div class="g3" id="java-patterns" style="margin-bottom:16px;"></div>
+        <div class="code-wrap">
+          <div class="code-header">ArchForgeApplication.java <span class="lang-badge" style="background:rgba(245,158,11,.12);color:var(--gold);">Java 17</span></div>
+          <div class="code-body">
+<span class="cmt">// Circuit Breaker — CLOSED → OPEN → HALF_OPEN</span>
+<span class="kw">enum</span> <span class="cls">State</span> { CLOSED, OPEN, HALF_OPEN }
+
+<span class="kw">public</span> &lt;T&gt; T <span class="fn">call</span>(<span class="cls">Supplier</span>&lt;T&gt; operation) {
+  <span class="kw">if</span> (state == OPEN) {
+    <span class="kw">if</span> (elapsed > timeoutMs) state = HALF_OPEN;
+    <span class="kw">else throw new</span> <span class="cls">RuntimeException</span>(<span class="str">"Fast fail"</span>);
+  }
+  <span class="kw">try</span> { T result = operation.<span class="fn">get</span>();
+         <span class="fn">onSuccess</span>(); <span class="kw">return</span> result; }
+  <span class="kw">catch</span> (<span class="cls">Exception</span> e) { <span class="fn">onFailure</span>(); <span class="kw">throw</span> e; }
+}
+
+<span class="cmt">// API Gateway — routes to service registry</span>
+<span class="kw">public</span> <span class="cls">ServiceResponse</span> <span class="fn">route</span>(<span class="cls">String</span> token,
+    <span class="cls">ServiceRequest</span> req) {
+  <span class="kw">return</span> registry.<span class="fn">get</span>(req.<span class="fn">service</span>())
+    .<span class="fn">map</span>(svc -> svc.<span class="fn">handle</span>(req))
+    .<span class="fn">orElse</span>(<span class="kw">new</span> <span class="cls">ServiceResponse</span>(<span class="kw">false</span>,
+        <span class="kw">null</span>, <span class="str">"Service not found"</span>, <span class="num">0</span>));
+}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPESCRIPT PAGE -->
+  <div class="page" id="page-typescript">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🔷 TypeScript — MVC + Generics</div></div></div>
+        <div class="card-body" id="ts-features"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Generic Repository Code</div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="code-wrap">
+            <div class="code-header">mvc_architecture.ts <span class="lang-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;">TypeScript</span></div>
+            <div class="code-body">
+<span class="cmt">// Generic Repository — type-safe for ANY entity</span>
+<span class="kw">class</span> <span class="cls">GenericRepository</span>&lt;T <span class="kw">extends</span> <span class="cls">Entity</span>&gt; {
+  <span class="kw">private</span> store: <span class="cls">Map</span>&lt;<span class="cls">UUID</span>, T&gt; = <span class="kw">new</span> <span class="cls">Map</span>();
+
+  <span class="fn">save</span>(entity: T): T { ... }
+  <span class="fn">findById</span>(id: <span class="cls">UUID</span>): <span class="cls">Optional</span>&lt;T&gt; { ... }
+  <span class="fn">findWhere</span>(pred: (e: T) => <span class="cls">boolean</span>): T[] { ... }
+}
+
+<span class="cmt">// @Log decorator — AOP-style</span>
+<span class="kw">function</span> <span class="fn">Log</span>(target, key, descriptor) {
+  <span class="kw">const</span> orig = descriptor.value;
+  descriptor.value = <span class="kw">function</span>(...args) {
+    <span class="kw">const</span> start = performance.<span class="fn">now</span>();
+    <span class="kw">const</span> result = orig.<span class="fn">apply</span>(<span class="kw">this</span>, args);
+    console.<span class="fn">log</span>(<span class="str">`Completed in ${elapsed}ms`</span>);
+    <span class="kw">return</span> result;
+  };
+}
+
+<span class="cmt">// MVC Controller with decorator + DI</span>
+<span class="kw">class</span> <span class="cls">ProductController</span> {
+  <span class="fn">constructor</span>(<span class="kw">private readonly</span>
+    service: <span class="cls">ProductService</span>) {}
+
+  <span class="dec">@Log</span>
+  <span class="fn">createProduct</span>(dto: <span class="cls">CreateProductDTO</span>)
+      : <span class="cls">ApiResponse</span>&lt;<span class="cls">IProduct</span>&gt; {
+    <span class="kw">const</span> product = <span class="kw">this</span>.service.<span class="fn">create</span>(dto);
+    <span class="kw">return</span> { success: <span class="kw">true</span>, data: product };
+  }
+}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C++ PAGE -->
+  <div class="page" id="page-cpp">
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">⚡ C++ — SOLID Principles + Templates</div></div></div>
+      <div class="card-body">
+        <div class="g2" style="margin-bottom:16px;" id="cpp-solid"></div>
+        <div class="sec-lbl" style="margin-top:8px;">Template Generic Cache (C++17)</div>
+        <div class="code-wrap">
+          <div class="code-header">solid_principles.cpp <span class="lang-badge" style="background:rgba(139,92,246,.15);color:#a78bfa;">C++17</span></div>
+          <div class="code-body">
+<span class="cmt">/* Generic Cache — works for ANY K, V types */</span>
+<span class="kw">template</span>&lt;<span class="kw">typename</span> K, <span class="kw">typename</span> V&gt;
+<span class="kw">class</span> <span class="cls">Cache</span> {
+  <span class="kw">struct</span> <span class="cls">Entry</span> { V value; time_point expires; };
+  unordered_map&lt;K, Entry&gt; store_;
+<span class="kw">public</span>:
+  <span class="kw">void</span> <span class="fn">put</span>(<span class="kw">const</span> K&amp; key, <span class="kw">const</span> V&amp; val);
+  optional&lt;V&gt; <span class="fn">get</span>(<span class="kw">const</span> K&amp; key);
+};
+
+<span class="cmt">/* Dependency Inversion — depend on IDatabase */</span>
+<span class="kw">class</span> <span class="cls">IDatabase</span> {  <span class="cmt">// Pure virtual interface</span>
+<span class="kw">public</span>:
+  <span class="kw">virtual</span> <span class="kw">bool</span> <span class="fn">save</span>(...) = <span class="num">0</span>;
+  <span class="kw">virtual</span> string <span class="fn">find</span>(...) = <span class="num">0</span>;
+  <span class="kw">virtual</span> ~<span class="cls">IDatabase</span>() = <span class="kw">default</span>;
+};
+
+<span class="kw">class</span> <span class="cls">OrderService</span> {
+  shared_ptr&lt;<span class="cls">IDatabase</span>&gt; db_;  <span class="cmt">// Abstraction!</span>
+<span class="kw">public</span>:
+  <span class="kw">explicit</span> <span class="cls">OrderService</span>(shared_ptr&lt;<span class="cls">IDatabase</span>&gt; db)
+    : db_(move(db)) {}
+  <span class="cmt">// Swap PostgreSQL ↔ MongoDB at runtime!</span>
+  <span class="kw">void</span> <span class="fn">set_database</span>(shared_ptr&lt;<span class="cls">IDatabase</span>&gt; db);
+};</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C# PAGE -->
+  <div class="page" id="page-csharp">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🟣 C# — CQRS + Event-Driven Architecture</div></div></div>
+        <div class="card-body" id="cs-features"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">CQRS Pattern Code</div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="code-wrap">
+            <div class="code-header">event_driven.cs <span class="lang-badge" style="background:rgba(124,58,237,.15);color:var(--vlt);">C# 10</span></div>
+            <div class="code-body">
+<span class="cmt">// Immutable Domain Event Records</span>
+<span class="kw">public record</span> <span class="cls">UserRegisteredEvent</span>(
+    string <span class="cls">UserId</span>, string <span class="cls">Name</span>, string <span class="cls">Email</span>)
+  : <span class="cls">DomainEventBase</span>
+{
+  <span class="kw">public override</span> string <span class="cls">EventType</span> =&gt;
+    <span class="str">"USER_REGISTERED"</span>;
+}
+
+<span class="cmt">// CQRS: Commands change state</span>
+<span class="kw">public record</span> <span class="cls">CreateUserCommand</span>(
+    string <span class="cls">Name</span>, string <span class="cls">Email</span>) : <span class="cls">ICommand</span>;
+
+<span class="cmt">// CQRS: Queries only read state</span>
+<span class="kw">public record</span> <span class="cls">GetAllUsersQuery</span>()
+    : <span class="cls">IQuery</span>&lt;<span class="cls">List</span>&lt;<span class="cls">UserDto</span>&gt;&gt;;
+
+<span class="cmt">// Mediator dispatches to handlers</span>
+<span class="kw">await</span> mediator.<span class="fn">SendAsync</span>(
+    <span class="kw">new</span> <span class="cls">CreateUserCommand</span>(<span class="str">"Alice"</span>, <span class="str">"alice@x.io"</span>));
+
+<span class="cmt">// Pattern Matching (C# 9+)</span>
+<span class="kw">var</span> msg = evt <span class="kw">switch</span> {
+  <span class="cls">UserRegisteredEvent</span> ure =&gt;
+      <span class="str">$"New user: {ure.Name}"</span>,
+  <span class="cls">OrderPlacedEvent</span> ope =&gt;
+      <span class="str">$"Order: ₦{ope.Total:N2}"</span>,
+  _ =&gt; <span class="str">"Unknown event"</span>
+};</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SQL PAGE -->
+  <div class="page" id="page-database">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">🗄 SQL — Architecture Registry</div></div></div>
+        <div class="card-body" id="sql-schema"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Analytics Queries</div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="code-wrap">
+            <div class="code-header">archforge_db.sql <span class="lang-badge" style="background:rgba(16,185,129,.1);color:var(--green);">MySQL 8.0</span></div>
+            <div class="code-body">
+<span class="cmt">-- Pattern usage across all languages</span>
+<span class="kw">SELECT</span> pattern_name, category,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> usage_count,
+       <span class="fn">GROUP_CONCAT</span>(<span class="kw">DISTINCT</span> language) <span class="kw">AS</span> langs
+<span class="kw">FROM</span> design_patterns
+<span class="kw">GROUP BY</span> pattern_name, category
+<span class="kw">ORDER BY</span> usage_count <span class="kw">DESC</span>;
+
+<span class="cmt">-- Coupling analysis view</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> coupling_analysis
+<span class="kw">WHERE</span> coupling_level = <span class="str">'Tight'</span>;
+
+<span class="cmt">-- Calculate instability score</span>
+<span class="kw">CALL</span> <span class="fn">calculate_instability</span>(component_id);
+<span class="cmt">-- Returns: Ca, Ce, instability (0=stable)</span>
+
+<span class="cmt">-- ADR history</span>
+<span class="kw">SELECT</span> s.system_name,
+       <span class="fn">CONCAT</span>(<span class="str">'ADR-'</span>,<span class="fn">LPAD</span>(adr_number,<span class="num">3</span>,<span class="str">'0'</span>)),
+       title, status
+<span class="kw">FROM</span> architecture_decisions adr
+<span class="kw">JOIN</span> systems s <span class="kw">ON</span> adr.system_id = s.system_id
+<span class="kw">ORDER BY</span> adr.decided_at;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARE PAGE -->
+  <div class="page" id="page-compare">
+    <div class="card">
+      <div class="card-head"><div class="card-title">⚖ Architecture Styles Comparison</div></div>
+      <div class="card-body">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;" id="arch-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ PAGE -->
+  <div class="page" id="page-quiz">
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">🎯 Architecture Knowledge Quiz</div><div class="card-sub">Test your CSC 419 knowledge</div></div><div id="quiz-score-display" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--gold);"></div></div>
+      <div class="card-body" id="quiz-body"></div>
+    </div>
+  </div>
+
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ DATA ════════════════════════════════════════════════
+const gofPatterns = [
+  {name:'Singleton',     cat:'Creational', col:'var(--gold)',   lang:'Python',     desc:'Thread-safe single instance using metaclass. Used for AppConfig, DatabasePool.'},
+  {name:'Factory Method',cat:'Creational', col:'var(--gold)',   lang:'Python',     desc:'Creates objects without exposing creation logic. NotificationFactory by channel.'},
+  {name:'Abstract Factory',cat:'Creational',col:'var(--gold)', lang:'Python',     desc:'Creates families of related objects. WebUIFactory vs MobileUIFactory.'},
+  {name:'Builder',       cat:'Creational', col:'var(--gold)',   lang:'Python',     desc:'Constructs complex objects step by step using fluent interface.'},
+  {name:'Prototype',     cat:'Creational', col:'var(--gold)',   lang:'Python',     desc:'Clone existing objects instead of creating from scratch. deepcopy.'},
+  {name:'Adapter',       cat:'Structural', col:'var(--cyan)',   lang:'Python',     desc:'Makes incompatible interfaces work together. LegacyPayment→ModernInterface.'},
+  {name:'Decorator',     cat:'Structural', col:'var(--cyan)',   lang:'Python',     desc:'Adds behavior without modifying. CachingDecorator + LoggingDecorator.'},
+  {name:'Facade',        cat:'Structural', col:'var(--cyan)',   lang:'Python',     desc:'Provides simple interface to complex subsystem. UserManagementFacade.'},
+  {name:'Proxy',         cat:'Structural', col:'var(--cyan)',   lang:'Python',     desc:'Controls access to real object. SecureFileSystemProxy with auth.'},
+  {name:'Composite',     cat:'Structural', col:'var(--cyan)',   lang:'TypeScript', desc:'Tree structures of objects treated uniformly. File/Folder hierarchy.'},
+  {name:'Bridge',        cat:'Structural', col:'var(--cyan)',   lang:'Java',       desc:'Separates abstraction from implementation. Shape + Renderer.'},
+  {name:'Flyweight',     cat:'Structural', col:'var(--cyan)',   lang:'C++',        desc:'Shares objects to reduce memory. Glyph objects in text editor.'},
+  {name:'Observer',      cat:'Behavioral', col:'var(--green)',  lang:'Python+Java',desc:'Event bus — publishers fire events, subscribers react independently.'},
+  {name:'Strategy',      cat:'Behavioral', col:'var(--green)',  lang:'Python+C++', desc:'Swappable algorithms. DataSorter uses BubbleSort or QuickSort at runtime.'},
+  {name:'Command',       cat:'Behavioral', col:'var(--green)',  lang:'Python',     desc:'Encapsulates requests as objects. TransferFundsCommand with undo/redo.'},
+  {name:'Chain of Resp.',cat:'Behavioral', col:'var(--green)',  lang:'Python',     desc:'Request passes through handlers. Auth→RateLimit→Validate→Process.'},
+  {name:'State',         cat:'Behavioral', col:'var(--green)',  lang:'Python+C#',  desc:'Changes behavior with internal state. Order: Pending→Confirmed→Shipped.'},
+  {name:'Template Method',cat:'Behavioral',col:'var(--green)',  lang:'Java',       desc:'Defines algorithm skeleton in base class. Subclasses override steps.'},
+  {name:'Iterator',      cat:'Behavioral', col:'var(--green)',  lang:'TypeScript', desc:'Sequential access without exposing internals. GenericRepository.findAll().'},
+  {name:'Mediator',      cat:'Behavioral', col:'var(--green)',  lang:'C#',         desc:'Central hub for object communication. CQRS Mediator dispatches commands.'},
+  {name:'Memento',       cat:'Behavioral', col:'var(--green)',  lang:'Python',     desc:'Captures/restores object state. Command history for undo functionality.'},
+  {name:'Visitor',       cat:'Behavioral', col:'var(--green)',  lang:'C#',         desc:'Adds operations to objects without modifying them. Event type dispatch.'},
+  {name:'Interpreter',   cat:'Behavioral', col:'var(--green)',  lang:'Python',     desc:'Defines grammar for a language. SQL query parser, expression evaluator.'},
+];
+
+const solidData = [
+  {letter:'S',color:'var(--gold)',name:'Single Responsibility Principle',
+   rule:'"A class should have only ONE reason to change."',
+   bad:'ReportClass: load_from_db() + calculate() + render() + save()',
+   good:'ReportRepository | ReportCalculator | ReportRenderer — each one job',
+   lang:'Python + C++',code:'class ReportCalculator:\n  def calculate(data)  # ONLY calculates\nclass ReportRenderer:\n  def render(data)     # ONLY renders'},
+  {letter:'O',color:'var(--cyan)',name:'Open/Closed Principle',
+   rule:'"Open for extension, closed for modification."',
+   bad:'if shape=="circle": ... if shape=="rect": ... # modify to add triangle!',
+   good:'class Circle(Shape) — add new shape without touching AreaCalculator',
+   lang:'Python + C++',code:'class AreaCalculator:\n  def total_area(shapes):\n    return sum(s.area() for s in shapes)\n    # NEVER changes when new shapes added!'},
+  {letter:'L',color:'var(--green)',name:'Liskov Substitution Principle',
+   rule:'"Subtypes must be substitutable for their base types."',
+   bad:'Square extends Rectangle but breaks set_width() — violates behavior!',
+   good:'Both Square and Rectangle extend Quadrilateral independently',
+   lang:'C++ + Python',code:'void print_area(const Quadrilateral& q):\n  cout << q.area();\n// Works for Rectangle AND Square ✓'},
+  {letter:'I',color:'var(--violet)',name:'Interface Segregation Principle',
+   rule:'"Clients should not depend on interfaces they don\'t use."',
+   bad:'IWorker: work() + eat() + sleep() — Robot forced to implement eat()!',
+   good:'IWorkable | IRestable | IBreakable — Robot only implements IWorkable',
+   lang:'C++ + Java',code:'class RobotWorker implements IWorkable:\n  void work()  // ONLY what robot needs\n  // No eat(), sleep() — not forced!'},
+  {letter:'D',color:'var(--rose)',name:'Dependency Inversion Principle',
+   rule:'"High-level modules depend on abstractions, not concretions."',
+   bad:'OrderService directly uses MySQLDatabase — cannot swap to MongoDB!',
+   good:'OrderService depends on IDatabase interface — swap any DB at runtime',
+   lang:'Python + C++ + Java',code:'class OrderService:\n  def __init__(self, db: IDatabase):  # Abstraction!\n    self.db = db  # inject PostgreSQL, MongoDB, Redis...'},
+];
+
+const archStyles = [
+  ['Monolithic',     'Single deployable unit',         '✅ Simple',    '❌ Hard to scale', '❌ Risky deploys',   'Small apps, startups'],
+  ['Layered (N-Tier)','Presentation/Business/Data',    '✅ Organized', '⚠️ Can be rigid',  '✅ Easy to test',    'Enterprise CRUD apps'],
+  ['Microservices',  'Small independent services',     '✅ Scalable',  '✅ Independent',   '❌ Complex comms',   'Large teams, cloud-native'],
+  ['Event-Driven',   'Events trigger services',        '✅ Decoupled', '✅ Async',         '⚠️ Hard to debug',   'Real-time, reactive systems'],
+  ['Clean',          'Domain at center, DI outward',   '✅ Testable',  '✅ Flexible',      '⚠️ More structure',  'Long-lived business apps'],
+  ['CQRS',           'Read/Write model separation',    '✅ Optimized', '✅ Scalable',      '❌ Complexity',      'High-read/write systems'],
+  ['Hexagonal',      'Ports & Adapters (Onion)',        '✅ Testable',  '✅ Framework-free','⚠️ Learning curve',  'Domain-rich applications'],
+  ['Serverless',     'Functions as a Service (FaaS)',  '✅ Low ops',   '✅ Auto-scales',   '❌ Cold starts',     'Event-triggered workloads'],
+];
+
+const quizQuestions = [
+  {q:'Which SOLID principle says "a class should have only one reason to change"?',
+   options:['O — Open/Closed','S — Single Responsibility','L — Liskov Substitution','D — Dependency Inversion'],ans:1},
+  {q:'The Circuit Breaker pattern prevents:',
+   options:['SQL injection attacks','Cascading failures in microservices','Memory leaks in Java','Race conditions in threading'],ans:1},
+  {q:'In Clean Architecture, which layer is at the INNERMOST ring?',
+   options:['Infrastructure','Interface Adapters','Application Use Cases','Domain/Entities'],ans:3},
+  {q:'CQRS stands for:',
+   options:['Command Queue Request Service','Command Query Responsibility Segregation','Concurrent Queue Resource System','Component Query Runtime Service'],ans:1},
+  {q:'The Decorator pattern is used to:',
+   options:['Create objects without new keyword','Add behavior without modifying the class','Control access to an object','Define algorithm skeletons'],ans:1},
+  {q:'Which pattern does Chain of Responsibility implement?',
+   options:['Multiple handlers process a request in sequence','Single handler processes all requests','Requests are queued and processed later','Events are broadcast to all subscribers'],ans:0},
+  {q:'In the Observer pattern, publishers are called:',
+   options:['Handlers','Subjects/Publishers','Observers','Controllers'],ans:1},
+  {q:'Which pattern separates the algorithm from how it is used?',
+   options:['Template Method','Factory Method','Strategy','Command'],ans:2},
+];
+
+// ══ NAV ═════════════════════════════════════════════════
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el) el.classList.add('active');
+  const meta={
+    home:['Architecture Dashboard','CSC 419: Software Design & Architecture — 7-Language Grand Finale'],
+    solid:['SOLID Principles','Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion'],
+    patterns:['Design Patterns — GoF','All 23 Gang of Four patterns implemented across 7 languages'],
+    clean:['Clean Architecture','Robert C. Martin — Dependency Rule, Domain-Driven Design, Ports & Adapters'],
+    uml:['UML Diagrams','Class diagrams, sequence diagrams, architectural views'],
+    python:['Python — 23 GoF Patterns + Clean Architecture','design_patterns.py + clean_architecture.py'],
+    java:['Java — Microservices Architecture','ArchForgeApplication.java — Service Registry, Circuit Breaker, API Gateway'],
+    typescript:['TypeScript — MVC + Generics + Decorators','mvc_architecture.ts — Generic Repository, @Log decorator, state machine'],
+    cpp:['C++ — SOLID + Templates','solid_principles.cpp — All 5 SOLID + generic Stack/Cache templates'],
+    csharp:['C# — CQRS + Event-Driven Architecture','event_driven.cs — Domain Events, Mediator, Pattern Matching, async/await'],
+    database:['SQL — Architecture Registry','archforge_db.sql — 7 tables, 4 views, 2 procedures, ADR tracking'],
+    compare:['Architecture Styles Comparison','Monolithic vs Microservices vs Event-Driven vs Clean vs CQRS'],
+    quiz:['Architecture Quiz','Test your knowledge of CSC 419 Software Design & Architecture'],
+  };
+  const [t,s]=meta[page]||['ArchForge',''];
+  document.getElementById('page-title').textContent=t;
+  document.getElementById('page-sub').textContent=s;
+  const renders={home:renderHome,solid:renderSolid,patterns:renderPatterns,clean:renderClean,uml:renderUML,python:renderPython,java:renderJava,typescript:renderTS,cpp:renderCpp,csharp:renderCSharp,database:renderDB,compare:renderCompare,quiz:initQuiz};
+  if(renders[page]) setTimeout(renders[page],50);
+}
+
+function showToast(msg,col='var(--gold)'){const t=document.getElementById('toast');t.textContent=msg;t.style.borderLeftColor=col;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ══ RENDER FUNCTIONS ════════════════════════════════════
+function renderHome() {
+  const cats = {};
+  gofPatterns.forEach(p => { cats[p.cat] = (cats[p.cat]||[]).concat(p.name); });
+  const catColors = {Creational:'var(--gold)',Structural:'var(--cyan)',Behavioral:'var(--green)'};
+  document.getElementById('home-patterns').innerHTML = Object.entries(cats).map(([cat,names])=>`
+    <div style="background:var(--s2);border:1px solid var(--border);border-top:2px solid ${catColors[cat]||'var(--gold)'};border-radius:9px;padding:14px;">
+      <div style="font-size:12px;font-weight:700;color:${catColors[cat]};margin-bottom:8px;letter-spacing:.5px;">${cat} (${names.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">${names.map(n=>`<span style="background:${catColors[cat]}14;color:${catColors[cat]};border:1px solid ${catColors[cat]}30;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:600;font-family:'Fira Code',monospace;">${n}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+function renderSolid() {
+  document.getElementById('solid-cards').innerHTML = solidData.map(s=>`
+    <div class="solid-card" style="background:${s.color}0d;border-color:${s.color}33;">
+      <div class="solid-letter">${s.letter}</div>
+      <div class="solid-title" style="color:${s.color};">${s.letter} — ${s.lang}</div>
+      <div class="solid-name" style="color:${s.color};">${s.name}</div>
+      <div style="font-size:12.5px;font-style:italic;color:var(--text2);margin-bottom:10px;">${s.rule}</div>
+      <div class="g2">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--rose);margin-bottom:4px;">❌ BEFORE (violation)</div>
+          <div style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.2);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--text2);font-family:'Fira Code',monospace;">${s.bad}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:4px;">✅ AFTER (correct)</div>
+          <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--text2);font-family:'Fira Code',monospace;">${s.good}</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;font-family:'Fira Code',monospace;font-size:11px;color:${s.color};line-height:1.8;white-space:pre;">${s.code}</div>
+    </div>`).join('');
+}
+
+let activeFilter='All';
+function renderPatterns() {
+  const cats=['All','Creational','Structural','Behavioral'];
+  const catColors={All:'var(--gold)',Creational:'var(--gold)',Structural:'var(--cyan)',Behavioral:'var(--green)'};
+  document.getElementById('pattern-filter').innerHTML=cats.map(c=>`
+    <button class="btn btn-sm" style="${c===activeFilter?`background:${catColors[c]};color:#000;`:'background:var(--s2);color:var(--text2);border:1px solid var(--border);'}" onclick="filterPatterns('${c}')">${c}</button>`).join('');
+  const filtered=activeFilter==='All'?gofPatterns:gofPatterns.filter(p=>p.cat===activeFilter);
+  document.getElementById('pattern-grid').innerHTML=filtered.map(p=>`
+    <div class="pattern-card" style="--pc:${p.col}" onclick="showToast('${p.name}: ${p.desc.substring(0,50)}...')">
+      <div class="pat-name">${p.name}</div>
+      <div class="pat-cat" style="color:${p.col};">${p.cat}</div>
+      <div style="font-size:9.5px;font-weight:600;color:var(--text3);margin-bottom:5px;font-family:'Fira Code',monospace;">${p.lang}</div>
+      <div class="pat-desc">${p.desc}</div>
+    </div>`).join('');
+}
+function filterPatterns(cat){activeFilter=cat;renderPatterns();}
+
+function renderClean() {
+  const layers=[
+    {n:'4',name:'Frameworks & Drivers',desc:'Web, DB, UI, External Services',col:'var(--text3)',role:'Most changeable — nothing depends on this'},
+    {n:'3',name:'Interface Adapters',desc:'Controllers, Presenters, Gateways',col:'var(--blue)',role:'Converts data between use cases and external formats'},
+    {n:'2',name:'Application Use Cases',desc:'Business Use Cases, Ports (Interfaces)',col:'var(--cyan)',role:'Application-specific business rules'},
+    {n:'1',name:'Domain / Entities',desc:'Enterprise Business Rules, Value Objects',col:'var(--gold)',role:'Most stable — zero external dependencies'},
+  ];
+  document.getElementById('clean-layers').innerHTML=layers.map(l=>`
+    <div class="arch-layer" style="background:${l.col}10;border:1px solid ${l.col}30;" onclick="showToast('Layer ${l.n}: ${l.role}')">
+      <div class="layer-num" style="color:${l.col};">${l.n}</div>
+      <div class="layer-name" style="color:${l.col};">${l.name}</div>
+      <div class="layer-content" style="font-size:11px;color:var(--text2);">${l.desc}</div>
+      <div class="layer-badge" style="background:${l.col}18;color:${l.col};">${l.n===1?'INNERMOST':l.n===4?'OUTERMOST':''}</div>
+    </div>`).join('');
+}
+
+function renderUML() {
+  const umlClass=(name,col,attrs,methods)=>`
+    <div class="uml-box" style="border-color:${col}44;">
+      <div class="uml-head" style="background:${col}18;color:${col};">${name}</div>
+      <div class="uml-divider"></div>
+      <div class="uml-body">${attrs.map(a=>`+${a}`).join('<br>')}</div>
+      <div class="uml-divider"></div>
+      <div class="uml-body">${methods.map(m=>`+${m}()`).join('<br>')}</div>
+    </div>`;
+
+  document.getElementById('uml-observer').innerHTML=[
+    umlClass('«interface»\nIObserver','var(--gold)',[],['update(data)']),
+    umlClass('EventBus','var(--cyan)',['_listeners: Dict'],['subscribe(event, handler)','publish(event, data)','unsubscribe()']),
+    umlClass('EmailHandler','var(--green)',[],['update(data)','onUserCreated()']),
+  ].join('<div style="display:flex;align-items:center;padding:8px;font-family:\"Fira Code\",monospace;font-size:16px;color:var(--text3);">◁─</div>');
+
+  document.getElementById('uml-strategy').innerHTML=[
+    umlClass('«interface»\nSortStrategy','var(--gold)',[],['sort(data)','name()']),
+    umlClass('BubbleSort','var(--rose)',[],['sort(data)','name()']),
+    umlClass('QuickSort','var(--green)',[],['sort(data)','name()']),
+  ].join('<div style="display:flex;align-items:center;padding:8px;font-family:\"Fira Code\",monospace;font-size:14px;color:var(--text3);">◁─ ─</div>');
+
+  // Sequence diagram
+  const seqSteps=[
+    {from:'Client',to:'Server',msg:'SYN (seq=100)',col:'var(--cyan)'},
+    {from:'Server',to:'Client',msg:'SYN-ACK (seq=200, ack=101)',col:'var(--green)'},
+    {from:'Client',to:'Server',msg:'ACK (ack=201)',col:'var(--gold)'},
+    {from:'Both',  to:'Both',  msg:'✓ Connection Established — Data Transfer',col:'var(--teal)'},
+  ];
+  document.getElementById('sequence-diagram').innerHTML=`<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'Fira Code',monospace;font-size:12px;">`+
+    seqSteps.map(s=>`<div style="margin:6px 0;color:${s.col};">${s.from==='Both'?'':'  '}<span style="color:var(--text2);">${s.from}</span> → <span style="color:var(--text2);">${s.to}</span>: <strong style="color:${s.col};">[${s.msg}]</strong></div>`).join('')+
+    `</div>`;
+}
+
+function renderPython() {
+  const cats=[{cat:'Creational',n:5,col:'var(--gold)'},
+    {cat:'Structural',n:7,col:'var(--cyan)'},{cat:'Behavioral',n:11,col:'var(--green)'}];
+  document.getElementById('py-patterns').innerHTML=cats.map(c=>`
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;color:${c.col};margin-bottom:8px;">${c.cat} Patterns (${c.n})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">${gofPatterns.filter(p=>p.cat===c.cat&&p.lang.includes('Python')).map(p=>`<span style="background:${c.col}12;color:${c.col};border:1px solid ${c.col}22;border-radius:3px;padding:2px 7px;font-size:10px;font-family:'Fira Code',monospace;">${p.name}</span>`).join('')}</div>
+    </div>`).join('');
+  document.getElementById('py-clean').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px;">`+
+    ['Domain (Entities, Value Objects)','Application (Use Cases, Ports)','Adapters (Repository, Notifier)','Infrastructure (DB, Email, HTTP)'].map((l,i)=>{
+      const cols=['var(--gold)','var(--cyan)','var(--violet)','var(--text3)'];
+      return `<div style="background:${cols[i]}0d;border:1px solid ${cols[i]}33;border-radius:7px;padding:10px 14px;font-size:12px;color:${cols[i]};font-weight:600;">${i+1}. ${l}</div>`;
+    }).join('')+`</div>`;
+}
+
+function renderJava() {
+  const patterns=[
+    {name:'Microservices',desc:'UserService + NotificationService independently deployable',col:'var(--gold)'},
+    {name:'Service Registry',desc:'Singleton registry — services register and discover',col:'var(--cyan)'},
+    {name:'Circuit Breaker',desc:'CLOSED→OPEN→HALF_OPEN — prevents cascade failures',col:'var(--rose)'},
+    {name:'API Gateway',desc:'Single entry point — routes, rate limits, authenticates',col:'var(--green)'},
+    {name:'Event-Driven',desc:'UserRegisteredEvent fires → NotificationService reacts',col:'var(--violet)'},
+    {name:'Repository',desc:'InMemoryUserRepository implements generic interface',col:'var(--teal)'},
+  ];
+  document.getElementById('java-patterns').innerHTML=patterns.map(p=>`
+    <div style="background:var(--s2);border:1px solid var(--border);border-top:2px solid ${p.col};border-radius:8px;padding:12px;">
+      <div style="font-size:12px;font-weight:700;color:${p.col};margin-bottom:4px;">${p.name}</div>
+      <div style="font-size:10.5px;color:var(--text2);">${p.desc}</div>
+    </div>`).join('');
+}
+
+function renderTS() {
+  const features=[
+    {t:'Generic Repository<T>',d:'Type-safe CRUD — works for ANY Entity type at compile time',c:'#60a5fa'},
+    {t:'@Log Decorator',d:'AOP-style method logging without modifying the class body',c:'var(--gold)'},
+    {t:'TypeScript Interfaces',d:'IProduct, IOrder, CreateProductDTO — strict contracts',c:'var(--cyan)'},
+    {t:'Order State Machine',d:'OrderStatus: pending→confirmed→shipped→delivered (validated)',c:'var(--green)'},
+    {t:'Dependency Injection',d:'ProductService injected into ProductController constructor',c:'var(--violet)'},
+    {t:'Union Types + Optional<T>',d:'Optional<T> = T | null | undefined — null safety',c:'var(--orange)'},
+  ];
+  document.getElementById('ts-features').innerHTML=features.map(f=>`
+    <div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid ${f.c};border-radius:0 8px 8px 0;padding:10px 13px;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:700;color:${f.c};margin-bottom:3px;font-family:'Fira Code',monospace;">${f.t}</div>
+      <div style="font-size:11px;color:var(--text2);">${f.d}</div>
+    </div>`).join('');
+}
+
+function renderCpp() {
+  document.getElementById('cpp-solid').innerHTML=solidData.map(s=>`
+    <div style="background:${s.color}0a;border:1px solid ${s.color}33;border-radius:9px;padding:14px;">
+      <div style="font-size:32px;font-weight:800;color:${s.color};opacity:.15;float:right;">${s.letter}</div>
+      <div style="font-size:13px;font-weight:700;color:${s.color};margin-bottom:4px;">${s.letter}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;">${s.name.split(' ').slice(0,2).join(' ')}</div>
+      <div style="font-size:11px;color:var(--text2);">${s.rule}</div>
+    </div>`).join('');
+}
+
+function renderCSharp() {
+  const features=[
+    {t:'Records (Immutable)',d:'DomainEventBase, UserRegisteredEvent — value-based equality, immutable by default',c:'var(--vlt)'},
+    {t:'CQRS Pattern',d:'Commands (mutate) and Queries (read) separated — different models, different handlers',c:'var(--cyan)'},
+    {t:'Mediator Pattern',d:'Single dispatch point — Mediator.SendAsync(cmd) → handler found and executed',c:'var(--gold)'},
+    {t:'C# Pattern Matching',d:'switch expressions on event types — clean, exhaustive, compiler-checked',c:'var(--green)'},
+    {t:'async/await',d:'All command handlers are async — non-blocking event publishing',c:'var(--orange)'},
+    {t:'ConcurrentDictionary',d:'Thread-safe session store — multiple concurrent requests handled safely',c:'var(--rose)'},
+  ];
+  document.getElementById('cs-features').innerHTML=features.map(f=>`
+    <div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid ${f.c};border-radius:0 8px 8px 0;padding:10px 13px;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:700;color:${f.c};margin-bottom:3px;">${f.t}</div>
+      <div style="font-size:11px;color:var(--text2);">${f.d}</div>
+    </div>`).join('');
+}
+
+function renderDB() {
+  const tables=[
+    {n:'systems','d':'Top-level software systems — arch_style, languages, status','c':'var(--gold)'},
+    {n:'components','d':'Individual components with layer, language, coverage metrics','c':'var(--cyan)'},
+    {n:'design_patterns','d':'Patterns used per system/component with category','c':'var(--violet)'},
+    {n:'dependencies','d':'Component dependency graph — coupling_level, is_interface','c':'var(--green)'},
+    {n:'architecture_decisions','d':'ADR — why decisions were made, alternatives considered','c':'var(--orange)'},
+    {n:'quality_metrics','d':'Instability, coupling, cohesion, maintainability scores','c':'var(--rose)'},
+    {n:'sdlc_phases','d':'Requirements→Design→Impl→Test→Deploy→Maintenance tracking','c':'var(--blue)'},
+  ];
+  document.getElementById('sql-schema').innerHTML=tables.map(t=>`
+    <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:center;">
+      <span style="font-family:'Fira Code',monospace;font-size:11px;color:${t.c};min-width:180px;font-weight:700;">${t.n}</span>
+      <span style="font-size:11.5px;color:var(--text2);">${t.d}</span>
+    </div>`).join('');
+}
+
+function renderCompare() {
+  const cols=['Architecture','Description','Pros','Cons','Testing','Best For'];
+  document.getElementById('arch-table').innerHTML=`<thead><tr style="background:var(--s2);">${cols.map(c=>`<th style="padding:9px 13px;text-align:left;color:var(--text2);border:1px solid var(--border);font-size:10px;letter-spacing:.5px;">${c}</th>`).join('')}</tr></thead><tbody>`+
+    archStyles.map(([name,...rest],i)=>`<tr style="${i%2===0?'':'background:var(--s2)'}">
+      <td style="padding:9px 12px;border:1px solid var(--border);font-weight:700;color:var(--gold);font-family:'Fira Code',monospace;">${name}</td>
+      ${rest.map(c=>`<td style="padding:9px 12px;border:1px solid var(--border);font-size:11.5px;color:var(--text2);">${c}</td>`).join('')}
+    </tr>`).join('')+`</tbody>`;
+}
+
+// ══ QUIZ ════════════════════════════════════════════════
+let qIdx=0, score=0, answered=false;
+function initQuiz() { qIdx=0; score=0; renderQuestion(); }
+
+function renderQuestion() {
+  const q = quizQuestions[qIdx];
+  document.getElementById('quiz-score-display').textContent=`${score}/${quizQuestions.length}`;
+  document.getElementById('quiz-body').innerHTML=`
+    <div style="background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:9px;padding:16px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1.5px;margin-bottom:8px;">Q${qIdx+1} OF ${quizQuestions.length}</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.5;">${q.q}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      ${q.options.map((opt,i)=>`<button onclick="answerQuiz(${i})" style="text-align:left;padding:12px 16px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">${String.fromCharCode(65+i)}. ${opt}</button>`).join('')}
+    </div>`;
+}
+
+function answerQuiz(selected) {
+  const q = quizQuestions[qIdx];
+  const correct = selected === q.ans;
+  if(correct) { score++; showToast('✅ Correct!','var(--green)'); }
+  else showToast(`❌ Correct answer: ${q.options[q.ans]}`,'var(--rose)');
+
+  qIdx++;
+  if(qIdx < quizQuestions.length) {
+    setTimeout(renderQuestion, 1200);
+  } else {
+    const pct = Math.round(score/quizQuestions.length*100);
+    document.getElementById('quiz-score-display').textContent=`${score}/${quizQuestions.length}`;
+    document.getElementById('quiz-body').innerHTML=`
+      <div style="text-align:center;padding:40px 20px;">
+        <div style="font-size:64px;font-weight:800;color:${pct>=75?'var(--green)':pct>=50?'var(--gold)':'var(--rose)'};font-family:'Fira Code',monospace;">${pct}%</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text);margin:10px 0;">Score: ${score} / ${quizQuestions.length}</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:20px;">${pct>=75?'Excellent! You have a strong grasp of Software Architecture':pct>=50?'Good understanding! Review the patterns you missed':'Study the SOLID principles and design patterns again'}</div>
+        <button class="btn btn-gold" onclick="initQuiz()">🔄 Retake Quiz</button>
+      </div>`;
+  }
+}
+
+// ══ INIT ════════════════════════════════════════════════
+renderHome();
+</script>
+</body>
+</html>
